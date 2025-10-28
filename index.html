@@ -1,0 +1,2442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galaxy Digital Holdings</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap JS Bundle (includes Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #1a237e;
+            --secondary-color: #283593;
+            --accent-color: #3949ab;
+            --text-color: #333;
+            --light-bg: #f5f5f5;
+            --white: #ffffff;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            color: var(--text-color);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        /* Loading Spinner */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Translation Loading Overlay */
+        .translation-loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            color: white;
+            font-size: 1.5rem;
+        }
+        
+        /* Header Styles */
+        .top-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 8px 0;
+            font-size: 14px;
+        }
+        
+        .top-header a {
+            color: white;
+            text-decoration: none;
+            margin-right: 15px;
+        }
+        
+        .main-header {
+            background-color: var(--white);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .logo {
+            font-weight: 700;
+            font-size: 24px;
+            color: var(--primary-color);
+        }
+        
+        .nav-link {
+            color: var(--text-color) !important;
+            font-weight: 500;
+            margin: 0 10px;
+            transition: color 0.3s;
+        }
+        
+        .nav-link:hover {
+            color: var(--accent-color) !important;
+        }
+        
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .dropdown-item {
+            padding: 10px 20px;
+        }
+        
+        /* Hero Section */
+        .hero-carousel {
+            position: relative;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .carousel-inner, .carousel-item {
+            height: 100%;
+        }
+        
+        .carousel-item {
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .hero-carousel .carousel-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(60%);
+        }
+
+        .hero-carousel .carousel-caption {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #fff;
+            animation: fadeInUp 1.5s ease-in-out;
+            width: 90%;
+            max-width: 900px;
+        }
+
+        .hero-carousel .carousel-caption h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            animation: slideInDown 1.5s ease-in-out;
+            margin-bottom: 1rem;
+        }
+
+        .hero-carousel .carousel-caption p {
+            font-size: 1.25rem;
+            margin: 20px 0;
+            animation: fadeIn 2s ease-in-out;
+        }
+
+        .btn-primary-custom {
+            background-color: var(--accent-color);
+            border: none;
+            padding: 12px 30px;
+            font-weight: 600;
+            border-radius: 30px;
+            transition: all 0.3s;
+            color: white;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary-custom:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            color: white;
+        }
+        
+        .carousel-control-prev, .carousel-control-next {
+            width: 5%;
+        }
+        
+        .carousel-indicators {
+            bottom: 30px;
+        }
+        
+        .carousel-indicators button {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin: 0 5px;
+        }
+        
+        /* Animation Keyframes */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -30%);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%);
+            }
+        }
+
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -60%);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%);
+            }
+        }
+        
+        /* Marquee Section */
+        .marquee-section {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 15px 0;
+            overflow: hidden;
+        }
+        
+        .marquee-content {
+            display: flex;
+            animation: marquee 30s linear infinite;
+        }
+        
+        .marquee-item {
+            white-space: nowrap;
+            margin-right: 50px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .marquee-item i {
+            margin-right: 10px;
+            color: #ffc107;
+        }
+        
+        @keyframes marquee {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+        
+        /* Features Section */
+        .features-section {
+            padding: 80px 0;
+            background-color: var(--light-bg);
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 50px;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        
+        .feature-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s;
+            height: 100%;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+        }
+        
+        .feature-icon {
+            font-size: 40px;
+            color: var(--accent-color);
+            margin-bottom: 20px;
+        }
+        
+        .feature-title {
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+        
+        /* Services Section */
+        .services-section {
+            padding: 80px 0;
+        }
+        
+        .service-card {
+            border: none;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s;
+            margin-bottom: 30px;
+            height: 100%;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-10px);
+        }
+        
+        .service-img {
+            height: 200px;
+            object-fit: cover;
+        }
+        
+        .service-body {
+            padding: 25px;
+        }
+        
+        .service-title {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+        
+        /* About Section */
+        .about-section {
+            padding: 80px 0;
+            background-color: var(--light-bg);
+        }
+        
+        .about-content {
+            display: flex;
+            align-items: center;
+        }
+        
+        .about-text {
+            padding-right: 30px;
+        }
+        
+        .about-img {
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            width: 100%;
+        }
+        
+        /* Videos Section */
+        .videos-section {
+            padding: 80px 0;
+            background-color: var(--white);
+        }
+        
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            height: 0;
+            overflow: hidden;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .video-description {
+            padding: 20px 0;
+            text-align: center;
+        }
+        
+        /* Certificates Section */
+        .certificates-section {
+            padding: 80px 0;
+            background-color: var(--light-bg);
+        }
+        
+        .certificate-card {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s;
+            margin-bottom: 30px;
+            height: 100%;
+        }
+        
+        .certificate-card:hover {
+            transform: translateY(-10px);
+        }
+        
+        .certificate-img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+        }
+        
+        .certificate-body {
+            padding: 25px;
+            text-align: center;
+        }
+        
+        .certificate-title {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+        
+        /* Testimonials Section */
+        .testimonials-section {
+            padding: 80px 0;
+        }
+        
+        .testimonial-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            margin: 15px 0;
+            height: 100%;
+        }
+        
+        .testimonial-text {
+            font-style: italic;
+            margin-bottom: 20px;
+        }
+        
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+        }
+        
+        .author-img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-right: 15px;
+            object-fit: cover;
+        }
+        
+        .author-info h5 {
+            margin-bottom: 0;
+            font-weight: 600;
+        }
+        
+        .author-info p {
+            margin-bottom: 0;
+            font-size: 14px;
+            color: #777;
+        }
+        
+        /* Stats Section */
+        .stats-section {
+            padding: 80px 0;
+            background: linear-gradient(rgba(26, 35, 126, 0.9), rgba(26, 35, 126, 0.9)), url('https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            text-align: center;
+        }
+        
+        .stat-item {
+            margin-bottom: 30px;
+        }
+        
+        .stat-number {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .stat-text {
+            font-size: 18px;
+        }
+        
+        /* Contact Section */
+        .contact-section {
+            padding: 80px 0;
+            background-color: var(--light-bg);
+        }
+        
+        .contact-form {
+            background-color: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .form-control {
+            padding: 12px 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+        }
+        
+        .form-control:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 0.2rem rgba(57, 73, 171, 0.25);
+        }
+        
+        /* New Sections */
+        .how-it-works-section {
+            padding: 80px 0;
+            background-color: var(--white);
+        }
+        
+        .step-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .step-card:hover {
+            transform: translateY(-10px);
+        }
+        
+        .step-number {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background-color: var(--accent-color);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .referral-section {
+            padding: 80px 0;
+            background-color: var(--light-bg);
+        }
+        
+        .referral-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s;
+            height: 100%;
+        }
+        
+        .referral-card:hover {
+            transform: translateY(-10px);
+        }
+        
+        .commission-badge {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+        
+        .activity-section {
+            padding: 80px 0;
+            background-color: var(--white);
+        }
+        
+        .activity-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            height: 100%;
+        }
+        
+        .activity-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .activity-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .activity-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .why-choose-section {
+            padding: 80px 0;
+            background-color: var(--light-bg);
+        }
+        
+        .nav-tabs {
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .nav-tabs .nav-link {
+            border: none;
+            color: var(--text-color);
+            font-weight: 500;
+            padding: 12px 25px;
+        }
+        
+        .nav-tabs .nav-link.active {
+            background-color: var(--accent-color);
+            color: white;
+            border-radius: 5px 5px 0 0;
+        }
+        
+        .tab-content {
+            padding: 30px 0;
+        }
+        
+        .tab-pane {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        .tab-image {
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            width: 100%;
+        }
+        
+        /* Footer */
+        .footer {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 60px 0 0;
+        }
+        
+        .footer-title {
+            font-weight: 600;
+            margin-bottom: 25px;
+            font-size: 18px;
+        }
+        
+        .footer-links {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+        
+        .footer-links a {
+            color: #ddd;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .footer-links a:hover {
+            color: white;
+        }
+        
+        .social-links {
+            display: flex;
+            margin-top: 20px;
+        }
+        
+        .social-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255,255,255,0.1);
+            color: white;
+            margin-right: 10px;
+            transition: all 0.3s;
+        }
+        
+        .social-links a:hover {
+            background-color: var(--accent-color);
+            transform: translateY(-3px);
+        }
+        
+        .copyright {
+            background-color: var(--secondary-color);
+            padding: 20px 0;
+            margin-top: 40px;
+            text-align: center;
+        }
+        
+        /* Language Selector */
+        .language-selector {
+            position: relative;
+        }
+        
+        .language-dropdown {
+            background: transparent;
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        
+        .language-dropdown option {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        /* Responsive Styles */
+        @media (max-width: 1200px) {
+            .hero-carousel .carousel-caption h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero-carousel .carousel-caption p {
+                font-size: 1.1rem;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .hero-carousel {
+                height: 70vh;
+            }
+            
+            .hero-carousel .carousel-caption h1 {
+                font-size: 2.2rem;
+            }
+            
+            .hero-carousel .carousel-caption p {
+                font-size: 1rem;
+            }
+            
+            .about-content {
+                flex-direction: column;
+            }
+            
+            .about-text {
+                padding-right: 0;
+                margin-bottom: 30px;
+            }
+            
+            .feature-card, .service-card, .certificate-card, .testimonial-card {
+                margin-bottom: 20px;
+            }
+            
+            .stat-number {
+                font-size: 36px;
+            }
+            
+            .stat-text {
+                font-size: 16px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .hero-carousel {
+                height: 60vh;
+            }
+            
+            .hero-carousel .carousel-caption h1 {
+                font-size: 1.8rem;
+            }
+            
+            .hero-carousel .carousel-caption p {
+                font-size: 0.9rem;
+            }
+            
+            .btn-primary-custom {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+            
+            .section-title {
+                font-size: 1.8rem;
+                margin-bottom: 30px;
+            }
+            
+            .features-section, .services-section, .about-section, 
+            .videos-section, .certificates-section, .testimonials-section,
+            .stats-section, .contact-section {
+                padding: 50px 0;
+            }
+            
+            .feature-card, .service-card, .certificate-card {
+                padding: 20px;
+            }
+            
+            .contact-form {
+                padding: 25px;
+            }
+            
+            .footer {
+                padding: 40px 0 0;
+            }
+            
+            .top-header .d-flex {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .top-header .d-flex > div {
+                margin-bottom: 10px;
+            }
+            
+            .top-header a {
+                margin-right: 10px;
+                font-size: 0.85rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .hero-carousel {
+                height: 50vh;
+            }
+            
+            .hero-carousel .carousel-caption h1 {
+                font-size: 1.5rem;
+            }
+            
+            .hero-carousel .carousel-caption p {
+                font-size: 0.8rem;
+                margin: 10px 0;
+            }
+            
+            .btn-primary-custom {
+                padding: 8px 16px;
+                font-size: 0.8rem;
+            }
+            
+            .section-title {
+                font-size: 1.5rem;
+            }
+            
+            .feature-icon {
+                font-size: 30px;
+            }
+            
+            .feature-title, .service-title, .certificate-title {
+                font-size: 1.1rem;
+            }
+            
+            .stat-number {
+                font-size: 28px;
+            }
+            
+            .stat-text {
+                font-size: 14px;
+            }
+            
+            .testimonial-card {
+                padding: 20px;
+            }
+            
+            .footer-title {
+                font-size: 1.1rem;
+            }
+            
+            .copyright p {
+                font-size: 0.9rem;
+            }
+            
+            .carousel-indicators {
+                bottom: 15px;
+            }
+            
+            .carousel-indicators button {
+                width: 8px;
+                height: 8px;
+            }
+            
+            .marquee-item {
+                font-size: 0.9rem;
+            }
+        }
+        
+        @media (max-width: 400px) {
+            .hero-carousel {
+                height: 45vh;
+            }
+            
+            .hero-carousel .carousel-caption h1 {
+                font-size: 1.3rem;
+            }
+            
+            .logo {
+                font-size: 1.2rem;
+            }
+            
+            .top-header {
+                font-size: 0.8rem;
+            }
+            
+            .top-header a {
+                font-size: 0.8rem;
+            }
+            
+            .language-dropdown {
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Translation Loading Overlay -->
+    <div class="translation-loading" id="translationLoading">
+        <div class="text-center">
+            <div class="loading-spinner" style="width: 40px; height: 40px;"></div>
+            <p class="mt-3">Translating...</p>
+        </div>
+    </div>
+
+    <!-- Top Header -->
+    <div class="top-header">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex flex-wrap">
+                    <a href="#"><i class="fas fa-phone-alt me-2"></i><span class="translate" data-key="phone">+1(260) 568-139</span></a>
+                    <a href="#"><i class="fas fa-envelope me-2"></i> <span class="translate" data-key="email">info@worldcurrencytrade.online</span></a>
+                </div>
+                <div class="d-flex align-items-center">
+                   <div class="language-selector me-3">
+                        <select class="language-dropdown" id="languageSelector">
+                            <option value="en">English</option>
+                            <option value="es">Español</option>
+                            <option value="fr">Français</option>
+                            <option value="de">Deutsch</option>
+                            <option value="zh">中文</option>
+                        </select>
+                    </div>
+                    <a href="login.html"><i class="fas fa-user me-2"></i> <span class="translate" data-key="login">Login</span></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Header -->
+    <header class="main-header">
+        <nav class="navbar navbar-expand-lg navbar-light">
+            <div class="container">
+                <a class="navbar-brand logo" href="#"><span class="translate" data-key="galaxy_digital">World Currency Trade</span></a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#home"><span class="translate" data-key="home">Home</span></a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span class="translate" data-key="services">Services</span>
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item" href="#services"><span class="translate" data-key="investment_management">Investment Management</span></a></li>
+                                <li><a class="dropdown-item" href="#services"><span class="translate" data-key="trading_market_making">Trading & Market Making</span></a></li>
+                                <li><a class="dropdown-item" href="#services"><span class="translate" data-key="asset_management">Asset Management</span></a></li>
+                                <li><a class="dropdown-item" href="#services"><span class="translate" data-key="principal_investments">Principal Investments</span></a></li>
+                                <li><a class="dropdown-item" href="#services"><span class="translate" data-key="advisory_services">Advisory Services</span></a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#about"><span class="translate" data-key="about">About</span></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#how-it-works"><span class="translate" data-key="how_it_works">How It Works</span></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#referral"><span class="translate" data-key="referral">Referral</span></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#activity"><span class="translate" data-key="activity">Activity</span></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#why-choose"><span class="translate" data-key="why_choose_us">Why Choose Us</span></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#contact"><span class="translate" data-key="contact">Contact</span></a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section with Carousel -->
+    <section class="hero-carousel" id="home">
+        <div id="heroCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="5000">
+            <div class="carousel-indicators">
+                <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+                <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+                <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+            </div>
+
+            <div class="carousel-inner">
+                <!-- Slide 1 -->
+                <div class="carousel-item active">
+                    <img src="https://images.unsplash.com/photo-1620207418302-439b387441b0?auto=format&fit=crop&w=1500&q=80" alt="Digital Asset">
+                    <div class="carousel-caption">
+                        <h1 class="translate" data-key="hero_title_1">Global Digital Asset & Blockchain Leader</h1>
+                        <p class="translate" data-key="hero_desc_1">World Currency Trade is a diversified financial services and investment management company in the digital asset, cryptocurrency, and blockchain technology sector.</p>
+                        <a href="register.html" class="btn btn-primary-custom">
+                            <span class="loading-spinner"></span><span class="translate" data-key="invest_now">Invest Now</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Slide 2 -->
+                <div class="carousel-item">
+                    <img src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1500&q=80" alt="Financial Solutions">
+                    <div class="carousel-caption">
+                        <h1 class="translate" data-key="hero_title_2">Innovative Financial Solutions</h1>
+                        <p class="translate" data-key="hero_desc_2">Providing institutions and direct clients with a full suite of financial solutions spanning the digital assets ecosystem.</p>
+                        <a href="register.html" class="btn btn-primary-custom">
+                            <span class="loading-spinner"></span><span class="translate" data-key="get_started">Get Started</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Slide 3 -->
+                <div class="carousel-item">
+                    <img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1500&q=80" alt="Secure Platform">
+                    <div class="carousel-caption">
+                        <h1 class="translate" data-key="hero_title_3">Secure & Regulated Platform</h1>
+                        <p class="translate" data-key="hero_desc_3">Our platform operates with the highest security standards and regulatory compliance to protect your investments.</p>
+                        <a href="register.html" class="btn btn-primary-custom">
+                            <span class="loading-spinner"></span><span class="translate" data-key="join_now">Join Now</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- Marquee Section -->
+    <section class="marquee-section">
+        <div class="marquee-content">
+            <div class="marquee-item">
+                <i class="fas fa-chart-line"></i>
+                <span>BTC: $45,230.15 +2.5%</span>
+            </div>
+            <div class="marquee-item">
+                <i class="fas fa-chart-line"></i>
+                <span>ETH: $3,215.67 +1.8%</span>
+            </div>
+            <div class="marquee-item">
+                <i class="fas fa-chart-line"></i>
+                <span>SOL: $102.45 +5.2%</span>
+            </div>
+            <div class="marquee-item">
+                <i class="fas fa-chart-line"></i>
+                <span>ADA: $0.58 +0.8%</span>
+            </div>
+            <div class="marquee-item">
+                <i class="fas fa-chart-line"></i>
+                <span>DOT: $7.32 +3.1%</span>
+            </div>
+            <div class="marquee-item">
+                <i class="fas fa-chart-line"></i>
+                <span>XRP: $0.62 -0.5%</span>
+            </div>
+            <div class="marquee-item">
+                <i class="fas fa-chart-line"></i>
+                <span>LTC: $72.18 +1.2%</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section">
+        <div class="container">
+            <h2 class="section-title translate" data-key="why_choose_title">Why Choose World Currency Trade</h2>
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h4 class="feature-title translate" data-key="secure_title">Secure & Regulated</h4>
+                        <p class="translate" data-key="secure_desc">Our platform operates with the highest security standards and regulatory compliance to protect your investments.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-rocket"></i>
+                        </div>
+                        <h4 class="feature-title translate" data-key="tech_title">Advanced Technology</h4>
+                        <p class="translate" data-key="tech_desc">Leverage cutting-edge blockchain technology and trading infrastructure for optimal performance.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-hand-holding-usd"></i>
+                        </div>
+                        <h4 class="feature-title translate" data-key="diverse_title">Diverse Investment Options</h4>
+                        <p class="translate" data-key="diverse_desc">Access a wide range of digital assets and investment products tailored to your financial goals.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+   
+    <!-- Videos Section -->
+<section class="videos-section py-5">
+  <div class="container">
+    <h2 class="section-title translate text-center mb-4" data-key="featured_videos">Featured Videos</h2>
+    <div class="row">
+      
+      <!-- First Video -->
+      <div class="col-md-6 mb-4">
+        <div class="video-container">
+          <video controls class="w-100 rounded">
+            <source src="videos/vd.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+        <div class="video-description mt-2">
+          <h4 class="translate" data-key="company_intro">Company Introduction</h4>
+          <p class="translate" data-key="company_intro_desc">
+            Learn about our mission, values, and the services we offer to our clients.
+          </p>
+        </div>
+      </div>
+      
+      <!-- Second Video -->
+      <div class="col-md-6 mb-4">
+        <div class="video-container">
+          <video controls class="w-100 rounded">
+            <source src="videos/wg.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+        <div class="video-description mt-2">
+          <h4 class="translate" data-key="service_overview">Service Overview</h4>
+          <p class="translate" data-key="service_overview_desc">
+            Get insights into our services and how we deliver value to our customers.
+          </p>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+</section>
+
+
+
+    <!-- Services Section -->
+    <section class="services-section" id="services">
+        <div class="container">
+            <h2 class="section-title translate" data-key="our_services">Our Services</h2>
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="card service-card">
+                        <img src="https://images.unsplash.com/photo-1639762681485-074b7f938ba0?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" class="card-img-top service-img" alt="Trading">
+                        <div class="card-body service-body">
+                            <h5 class="card-title service-title translate" data-key="trading_market_making">Trading & Market Making</h5>
+                            <p class="card-text translate" data-key="trading_desc">Comprehensive trading services across multiple digital assets with deep liquidity and competitive pricing.</p>
+                            <a href="#" class="btn btn-primary-custom"><span class="translate" data-key="learn_more">Learn More</span></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card service-card">
+                        <img src="https://images.unsplash.com/photo-1553877522-43269d4ea984?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" class="card-img-top service-img" alt="Asset Management">
+                        <div class="card-body service-body">
+                            <h5 class="card-title service-title translate" data-key="asset_management">Asset Management</h5>
+                            <p class="card-text translate" data-key="asset_desc">Professional management of digital asset portfolios for institutional and accredited investors.</p>
+                            <a href="#" class="btn btn-primary-custom"><span class="translate" data-key="learn_more">Learn More</span></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card service-card">
+                        <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" class="card-img-top service-img" alt="Investment Banking">
+                        <div class="card-body service-body">
+                            <h5 class="card-title service-title translate" data-key="investment_banking">Investment Banking</h5>
+                            <p class="card-text translate" data-key="banking_desc">Strategic advisory and capital raising services for blockchain and digital asset companies.</p>
+                            <a href="#" class="btn btn-primary-custom"><span class="translate" data-key="learn_more">Learn More</span></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about-section" id="about">
+        <div class="container">
+            <div class="row about-content">
+                <div class="col-md-6 about-text">
+                    <h2 class="section-title text-start translate" data-key="about_title">About World Currency Trade</h2>
+                    <p class="translate" data-key="about_desc_1">World Currency Trade. is a technology-driven financial services and investment management firm that provides institutions and direct clients with a full suite of financial solutions spanning the digital assets ecosystem.</p>
+                    <p class="translate" data-key="about_desc_2">Founded in 2018, our company has grown to become a global leader in the digital asset space, with offices in New York, London, Hong Kong, and Singapore.</p>
+                    <p class="translate" data-key="about_desc_3">Our diverse team of professionals brings decades of experience from traditional finance and emerging technology sectors, allowing us to bridge the gap between conventional financial markets and the digital asset ecosystem.</p>
+                    <a href="#" class="btn btn-primary-custom mt-3"><span class="translate" data-key="our_story">Our Story</span></a>
+                </div>
+                <div class="col-md-6">
+                    <img src="https://images.unsplash.com/photo-1639762681057-408e52192e55?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" class="img-fluid about-img" alt="About Us">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="how-it-works-section" id="how-it-works">
+        <div class="container">
+            <h2 class="section-title translate" data-key="how_it_works_title">Follow These Three Simple Steps to Join Us!</h2>
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="step-card">
+                        <div class="step-number">1</div>
+                        <div class="feature-icon">
+                            <i class="fas fa-globe"></i>
+                        </div>
+                        <h4 class="feature-title translate" data-key="step_1_title">Log on to our website</h4>
+                        <p class="translate" data-key="step_1_desc">On our website, click the JOIN NOW button to begin your investment journey.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="step-card">
+                        <div class="step-number">2</div>
+                        <div class="feature-icon">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                        <h4 class="feature-title translate" data-key="step_2_title">Create a free account</h4>
+                        <p class="translate" data-key="step_2_desc">Provide your details to create a free account and verify your identity.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="step-card">
+                        <div class="step-number">3</div>
+                        <div class="feature-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h4 class="feature-title translate" data-key="step_3_title">Select an investment</h4>
+                        <p class="translate" data-key="step_3_desc">Choose a plan and deposit to start earning with our diverse investment options.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center mt-4">
+                <a href="register.html" class="btn btn-primary-custom">
+                    <span class="loading-spinner"></span><span class="translate" data-key="start_investing">Start Investing Now</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Referral Section -->
+    <section class="referral-section" id="referral">
+        <div class="container">
+            <h2 class="section-title translate" data-key="referral_program">REFERRAL PROGRAM</h2>
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="referral-card text-center">
+                        <div class="commission-badge translate" data-key="commission">5.00% Commission</div>
+                        <h3 class="mb-4 translate" data-key="referral_title">Share Your Link & Earn Rewards</h3>
+                        <p class="mb-4 translate" data-key="referral_desc">Join our multi-level referral program and get additional income by inviting new investors to the platform. Share your referral link and get 5% of the deposits of your direct referrals made from an external wallet on any plans of the system.</p>
+                        <div class="input-group mb-4">
+                            <input type="text" class="form-control" value="https://galaxydigital.com/ref/yourusername" readonly>
+                            <button class="btn btn-primary-custom" type="button"><span class="translate" data-key="copy_link">Copy Link</span></button>
+                        </div>
+                        <a href="#" class="btn btn-primary-custom"><span class="translate" data-key="view_dashboard">View Referral Dashboard</span></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Activity Section -->
+    <section class="activity-section" id="activity">
+        <div class="container">
+            <h2 class="section-title translate" data-key="recent_activity">Recent Platform Activity</h2>
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="activity-card">
+                        <h4 class="mb-4"><i class="fas fa-arrow-down text-success me-2"></i> <span class="translate" data-key="latest_deposits">Latest Deposits</span></h4>
+                        <ul class="activity-list">
+                            <li>
+                                <span>Giovanni Santamaria</span>
+                                <span class="text-success">$1250.00</span>
+                            </li>
+                            <li>
+                                <span>Giovanni Santamaria</span>
+                                <span class="text-success">$50.00</span>
+                            </li>
+                            <li>
+                                <span>Ricardo Bryant</span>
+                                <span class="text-success">$4710.00</span>
+                            </li>
+                            <li>
+                                <span>Tristin Hicks</span>
+                                <span class="text-success">$3840.00</span>
+                            </li>
+                            <li>
+                                <span>Joshua Ford</span>
+                                <span class="text-success">$45763.00</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="activity-card">
+                        <h4 class="mb-4"><i class="fas fa-arrow-up text-danger me-2"></i> <span class="translate" data-key="latest_withdrawals">Latest Withdrawals</span></h4>
+                        <ul class="activity-list">
+                            <li>
+                                <span>Keith Gentry</span>
+                                <span class="text-danger">$22960.00</span>
+                            </li>
+                            <li>
+                                <span>Arthur Lee</span>
+                                <span class="text-danger">$10019.00</span>
+                            </li>
+                            <li>
+                                <span>Sirpa Heinimäki</span>
+                                <span class="text-danger">$1000.00</span>
+                            </li>
+                            <li>
+                                <span>Sirpa Heinimäki</span>
+                                <span class="text-danger">$1000.00</span>
+                            </li>
+                            <li>
+                                <span>Jason Davis</span>
+                                <span class="text-danger">$200.00</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Choose Us Section -->
+    <section class="why-choose-section" id="why-choose">
+        <div class="container">
+            <h2 class="section-title translate" data-key="why_choose_us">Why Choose Us</h2>
+            
+            <ul class="nav nav-tabs justify-content-center" id="whyChooseTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="hedge-funds-tab" data-bs-toggle="tab" data-bs-target="#hedge-funds" type="button" role="tab" aria-controls="hedge-funds" aria-selected="true"><span class="translate" data-key="hedge_funds">Hedge Funds</span></button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="cryptoassets-tab" data-bs-toggle="tab" data-bs-target="#cryptoassets" type="button" role="tab" aria-controls="cryptoassets" aria-selected="false"><span class="translate" data-key="cryptoassets">Cryptoassets</span></button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="portfolio-tab" data-bs-toggle="tab" data-bs-target="#portfolio" type="button" role="tab" aria-controls="portfolio" aria-selected="false"><span class="translate" data-key="portfolio">Portfolio</span></button>
+                </li>
+            </ul>
+            
+            <div class="tab-content" id="whyChooseTabsContent">
+                <div class="tab-pane fade show active" id="hedge-funds" role="tabpanel" aria-labelledby="hedge-funds-tab">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <h3 class="mb-4 translate" data-key="hedge_funds_title">Strategic Hedge Fund Investments</h3>
+                            <p class="translate" data-key="hedge_funds_desc_1">Our funds are diversified to include protocols and blockchain companies, ensuring a balanced approach to digital asset investments.</p>
+                            <p class="translate" data-key="hedge_funds_desc_2">We employ sophisticated risk management strategies and leverage our deep market expertise to maximize returns while minimizing exposure.</p>
+                            <p class="translate" data-key="hedge_funds_desc_3">Our hedge fund strategies are designed to capitalize on market inefficiencies and emerging opportunities in the rapidly evolving digital asset space.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <img src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" class="tab-image" alt="Hedge Funds">
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="cryptoassets" role="tabpanel" aria-labelledby="cryptoassets-tab">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <h3 class="mb-4 translate" data-key="cryptoassets_title">Strategic Cryptoasset Allocation</h3>
+                            <p class="translate" data-key="cryptoassets_desc_1">Our funds focus on tokens that incentivize the core actions of a protocol and/or excel in developing novel mechanisms for smart contracts.</p>
+                            <p class="translate" data-key="cryptoassets_desc_2">We conduct thorough due diligence on each cryptoasset, evaluating technology, team, tokenomics, and market potential before making investment decisions.</p>
+                            <p class="translate" data-key="cryptoassets_desc_3">Our approach combines fundamental analysis with technical indicators to identify promising projects with long-term growth potential.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <img src="https://images.unsplash.com/photo-1621416894564-9e36687ec3cc?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" class="tab-image" alt="Cryptoassets">
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="portfolio" role="tabpanel" aria-labelledby="portfolio-tab">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <h3 class="mb-4 translate" data-key="portfolio_title">Diversified Portfolio Strategy</h3>
+                            <p class="translate" data-key="portfolio_desc_1">In addition to established cryptoassets, we invest in early token sales that interact with an actual business or product in the blockchain ecosystem.</p>
+                            <p class="translate" data-key="portfolio_desc_2">Our portfolio construction methodology emphasizes diversification across sectors, stages, and risk profiles to optimize risk-adjusted returns.</p>
+                            <p class="translate" data-key="portfolio_desc_3">We continuously monitor and rebalance our portfolios to adapt to changing market conditions and capitalize on emerging opportunities.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <img src="https://images.unsplash.com/photo-1553877522-43269d4ea984?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" class="tab-image" alt="Portfolio">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    
+
+    <!-- Certificates Section -->
+    <section class="certificates-section py-5">
+        <div class="container">
+            <h2 class="section-title text-center mb-4 translate" data-key="our_certification">Our Certification</h2>
+            <div class="row align-items-center">
+                <!-- Text Div -->
+                <div class="col-md-6">
+                    <div class="certificate-text">
+                        <h4 class="certificate-title translate" data-key="certification_title">World Currency Trade</h4>
+                        <p class="translate" data-key="certification_desc">
+                            We are proud to be officially recognized by Galaxy Digital Holdings. 
+                            This certification highlights our dedication to innovation, transparency, 
+                            and excellence in the digital asset and financial services industry.
+                        </p>
+                    </div>
+                </div>
+                <!-- Image Div -->
+                <div class="col-md-6 text-center">
+                    <div class="certificate-image">
+                        <img src="img/cert.jpg" class="img-fluid cert-img" alt="Galaxy Digital Holdings Certificate">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <style>
+        .cert-img {
+            max-width: 500px; /* medium size */
+            width: 70%;      /* stays responsive */
+            height: auto;     /* keeps aspect ratio */
+        }
+    </style>
+
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3 col-6">
+                    <div class="stat-item">
+                        <div class="stat-number">$5.2B</div>
+                        <div class="stat-text translate" data-key="assets_managed">Assets Under Management</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-item">
+                        <div class="stat-number">250+</div>
+                        <div class="stat-text translate" data-key="employees">Global Employees</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-item">
+                        <div class="stat-number">40+</div>
+                        <div class="stat-text translate" data-key="countries">Countries Served</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-item">
+                        <div class="stat-number">2018</div>
+                        <div class="stat-text translate" data-key="year_founded">Year Founded</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials-section">
+        <div class="container">
+            <h2 class="section-title translate" data-key="testimonials">What Our Clients Say</h2>
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="testimonial-card">
+                        <p class="testimonial-text translate" data-key="testimonial_1">"World Currency Trade has been an invaluable partner in navigating the complex world of digital assets. Their expertise and market insight have significantly enhanced our investment strategy."</p>
+                        <div class="testimonial-author">
+                            <img src="https://randomuser.me/api/portraits/men/32.jpg" class="author-img" alt="Client">
+                            <div class="author-info">
+                                <h5>Michael Roberts</h5>
+                                <p class="translate" data-key="cfo">CFO, TechGrowth Inc.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="testimonial-card">
+                        <p class="testimonial-text translate" data-key="testimonial_2">"The team at World Currency Trade provided exceptional guidance during our token offering. Their comprehensive approach and industry connections were instrumental to our success."</p>
+                        <div class="testimonial-author">
+                            <img src="https://randomuser.me/api/portraits/women/44.jpg" class="author-img" alt="Client">
+                            <div class="author-info">
+                                <h5>Sarah Johnson</h5>
+                                <p class="translate" data-key="ceo">CEO, Blockchain Solutions</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="testimonial-card">
+                        <p class="testimonial-text translate" data-key="testimonial_3">"As a family office, we needed a trusted partner to help us allocate to digital assets. Galaxy Digital's institutional approach and security measures gave us complete confidence."</p>
+                        <div class="testimonial-author">
+                            <img src="https://randomuser.me/api/portraits/men/67.jpg" class="author-img" alt="Client">
+                            <div class="author-info">
+                                <h5>David Chen</h5>
+                                <p class="translate" data-key="managing_partner">Managing Partner, Heritage Capital</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="contact-section" id="contact">
+        <div class="container">
+            <h2 class="section-title translate" data-key="get_in_touch">Get In Touch</h2>
+            <div class="row">
+                <div class="col-md-8 mx-auto">
+                    <div class="contact-form">
+                        <form>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <input type="text" class="form-control" placeholder="First Name" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <input type="text" class="form-control" placeholder="Last Name" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <input type="email" class="form-control" placeholder="Email Address" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <input type="tel" class="form-control" placeholder="Phone Number">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <select class="form-control" required>
+                                        <option value="" disabled selected class="translate" data-key="select_service">Select Service Interest</option>
+                                        <option value="trading" class="translate" data-key="trading_market_making">Trading & Market Making</option>
+                                        <option value="asset-management" class="translate" data-key="asset_management">Asset Management</option>
+                                        <option value="investment-banking" class="translate" data-key="investment_banking">Investment Banking</option>
+                                        <option value="principal-investments" class="translate" data-key="principal_investments">Principal Investments</option>
+                                        <option value="advisory" class="translate" data-key="advisory_services">Advisory Services</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <textarea class="form-control" rows="5" placeholder="Your Message"></textarea>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-12 text-center">
+                                    <button type="submit" class="btn btn-primary-custom"><span class="translate" data-key="submit_inquiry">Submit Inquiry</span></button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <h5 class="footer-title translate" data-key="galaxy_digital">World Currency Trade</h5>
+                    <p class="translate" data-key="footer_desc">Global leader in digital asset financial services, providing institutions and direct clients with innovative solutions across the digital assets ecosystem.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <h5 class="footer-title translate" data-key="quick_links">Quick Links</h5>
+                    <ul class="footer-links">
+                        <li><a href="#home"><span class="translate" data-key="home">Home</span></a></li>
+                        <li><a href="#about"><span class="translate" data-key="about">About Us</span></a></li>
+                        <li><a href="#services"><span class="translate" data-key="services">Services</span></a></li>
+                        <li><a href="#how-it-works"><span class="translate" data-key="how_it_works">How It Works</span></a></li>
+                        <li><a href="#referral"><span class="translate" data-key="referral">Referral Program</span></a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <h5 class="footer-title translate" data-key="services">Services</h5>
+                    <ul class="footer-links">
+                        <li><a href="#services"><span class="translate" data-key="trading_market_making">Trading</span></a></li>
+                        <li><a href="#services"><span class="translate" data-key="asset_management">Asset Management</span></a></li>
+                        <li><a href="#services"><span class="translate" data-key="investment_banking">Investment Banking</span></a></li>
+                        <li><a href="#services"><span class="translate" data-key="principal_investments">Principal Investments</span></a></li>
+                        <li><a href="#services"><span class="translate" data-key="advisory_services">Advisory Services</span></a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <h5 class="footer-title translate" data-key="contact">Contact Us</h5>
+                    <ul class="footer-links">
+                        <li><i class="fas fa-map-marker-alt me-2"></i><span class="translate" data-key="address">principal address at 300 Vesey Street, New York, NY</span></li>
+                        <li><i class="fas fa-phone-alt me-2"></i><span class="translate" data-key="phone">+1(260) 568-1393</span></li>
+                        <li><i class="fas fa-envelope me-2"></i> <span class="translate" data-key="email">info@worldcurrencytrade.online</span></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2023 <span class="translate" data-key="galaxy_digital">WORLD CURRENCY TRADE LTD.</span> <span class="translate" data-key="all_rights">All Rights Reserved.</span></p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Translation data
+        const translations = {
+            en: {
+                // Header
+                phone: "+12058870897",
+                email: "info@worldcurencytrade.online",
+                login: "Login",
+                home: "Home",
+                services: "Services",
+                investment_management: "Investment Management",
+                trading_market_making: "Trading & Market Making",
+                asset_management: "Asset Management",
+                principal_investments: "Principal Investments",
+                advisory_services: "Advisory Services",
+                about: "About",
+                how_it_works: "How It Works",
+                referral: "Referral",
+                activity: "Activity",
+                why_choose_us: "Why Choose Us",
+                contact: "Contact",
+                galaxy_digital: "World Currency Trade",
+                
+                // Hero
+                hero_title_1: "World Currency Trade Asset & Blockchain Leader",
+                hero_desc_1: "World Currency Trade is a diversified financial services and investment management company in the digital asset, cryptocurrency, and blockchain technology sector.",
+                invest_now: "Invest Now",
+                
+                hero_title_2: "Innovative Financial Solutions",
+                hero_desc_2: "Providing institutions and direct clients with a full suite of financial solutions spanning the digital assets ecosystem.",
+                get_started: "Get Started",
+                
+                hero_title_3: "Secure & Regulated Platform",
+                hero_desc_3: "Our platform operates with the highest security standards and regulatory compliance to protect your investments.",
+                join_now: "Join Now",
+                
+                // Features
+                why_choose_title: "Why Choose World Currency Trade",
+                secure_title: "Secure & Regulated",
+                secure_desc: "Our platform operates with the highest security standards and regulatory compliance to protect your investments.",
+                tech_title: "Advanced Technology",
+                tech_desc: "Leverage cutting-edge blockchain technology and trading infrastructure for optimal performance.",
+                diverse_title: "Diverse Investment Options",
+                diverse_desc: "Access a wide range of digital assets and investment products tailored to your financial goals.",
+                
+                // Services
+                our_services: "Our Services",
+                trading_desc: "Comprehensive trading services across multiple digital assets with deep liquidity and competitive pricing.",
+                asset_desc: "Professional management of digital asset portfolios for institutional and accredited investors.",
+                investment_banking: "Investment Banking",
+                banking_desc: "Strategic advisory and capital raising services for blockchain and digital asset companies.",
+                learn_more: "Learn More",
+                
+                // About
+                about_title: "About World Currency Trade",
+                about_desc_1: "World Currency Trade is a technology-driven financial services and investment management firm that provides institutions and direct clients with a full suite of financial solutions spanning the digital assets ecosystem.",
+                about_desc_2: "Founded in 2018, our company has grown to become a global leader in the digital asset space, with offices in New York, London, Hong Kong, and Singapore.",
+                about_desc_3: "Our diverse team of professionals brings decades of experience from traditional finance and emerging technology sectors, allowing us to bridge the gap between conventional financial markets and the digital asset ecosystem.",
+                our_story: "Our Story",
+                
+                // How It Works
+                how_it_works_title: "Follow These Three Simple Steps to Join Us!",
+                step_1_title: "Log on to our website",
+                step_1_desc: "On our website, click the JOIN NOW button to begin your investment journey.",
+                step_2_title: "Create a free account",
+                step_2_desc: "Provide your details to create a free account and verify your identity.",
+                step_3_title: "Select an investment",
+                step_3_desc: "Choose a plan and deposit to start earning with our diverse investment options.",
+                start_investing: "Start Investing Now",
+                
+                // Referral
+                referral_program: "REFERRAL PROGRAM",
+                commission: "5.00% Commission",
+                referral_title: "Share Your Link & Earn Rewards",
+                referral_desc: "Join our multi-level referral program and get additional income by inviting new investors to the platform. Share your referral link and get 5% of the deposits of your direct referrals made from an external wallet on any plans of the system.",
+                copy_link: "Copy Link",
+                view_dashboard: "View Referral Dashboard",
+                
+                // Activity
+                recent_activity: "Recent Platform Activity",
+                latest_deposits: "Latest Deposits",
+                latest_withdrawals: "Latest Withdrawals",
+                
+                // Why Choose Us
+                hedge_funds: "Hedge Funds",
+                cryptoassets: "Cryptoassets",
+                portfolio: "Portfolio",
+                hedge_funds_title: "Strategic Hedge Fund Investments",
+                hedge_funds_desc_1: "Our funds are diversified to include protocols and blockchain companies, ensuring a balanced approach to digital asset investments.",
+                hedge_funds_desc_2: "We employ sophisticated risk management strategies and leverage our deep market expertise to maximize returns while minimizing exposure.",
+                hedge_funds_desc_3: "Our hedge fund strategies are designed to capitalize on market inefficiencies and emerging opportunities in the rapidly evolving digital asset space.",
+                cryptoassets_title: "Strategic Cryptoasset Allocation",
+                cryptoassets_desc_1: "Our funds focus on tokens that incentivize the core actions of a protocol and/or excel in developing novel mechanisms for smart contracts.",
+                cryptoassets_desc_2: "We conduct thorough due diligence on each cryptoasset, evaluating technology, team, tokenomics, and market potential before making investment decisions.",
+                cryptoassets_desc_3: "Our approach combines fundamental analysis with technical indicators to identify promising projects with long-term growth potential.",
+                portfolio_title: "Diversified Portfolio Strategy",
+                portfolio_desc_1: "In addition to established cryptoassets, we invest in early token sales that interact with an actual business or product in the blockchain ecosystem.",
+                portfolio_desc_2: "Our portfolio construction methodology emphasizes diversification across sectors, stages, and risk profiles to optimize risk-adjusted returns.",
+                portfolio_desc_3: "We continuously monitor and rebalance our portfolios to adapt to changing market conditions and capitalize on emerging opportunities.",
+                
+                // Videos
+                featured_videos: "Featured Videos",
+                company_intro: "Company Introduction",
+                company_intro_desc: "Learn about our mission, values, and the services we offer to our clients.",
+                
+                // Certification
+                our_certification: "Our Certification",
+                certification_title: "Galaxy Digital Holdings Certification",
+                certification_desc: "We are proud to be officially recognized by Galaxy Digital Holdings. This certification highlights our dedication to innovation, transparency, and excellence in the digital asset and financial services industry.",
+                
+                // Stats
+                assets_managed: "Assets Under Management",
+                employees: "Global Employees",
+                countries: "Countries Served",
+                year_founded: "Year Founded",
+                
+                // Testimonials
+                testimonials: "What Our Clients Say",
+                testimonial_1: "\"Galaxy Digital has been an invaluable partner in navigating the complex world of digital assets. Their expertise and market insight have significantly enhanced our investment strategy.\"",
+                testimonial_2: "\"The team at Galaxy Digital provided exceptional guidance during our token offering. Their comprehensive approach and industry connections were instrumental to our success.\"",
+                testimonial_3: "\"As a family office, we needed a trusted partner to help us allocate to digital assets. Galaxy Digital's institutional approach and security measures gave us complete confidence.\"",
+                cfo: "CFO, TechGrowth Inc.",
+                ceo: "CEO, Blockchain Solutions",
+                managing_partner: "Managing Partner, Heritage Capital",
+                
+                // Contact
+                get_in_touch: "Get In Touch",
+                select_service: "Select Service Interest",
+                submit_inquiry: "Submit Inquiry",
+                
+                // Footer
+                footer_desc: "Global leader in digital asset financial services, providing institutions and direct clients with innovative solutions across the digital assets ecosystem.",
+                quick_links: "Quick Links",
+                address: "principal address at 300 Vesey Street, New York, NY",
+                all_rights: "All Rights Reserved."
+            },
+            es: {
+                // Header
+                phone: "+12058870897",
+                email: "info@galaxydigital.com",
+                login: "Iniciar Sesión",
+                home: "Inicio",
+                services: "Servicios",
+                investment_management: "Gestión de Inversiones",
+                trading_market_making: "Operaciones y Creación de Mercado",
+                asset_management: "Gestión de Activos",
+                principal_investments: "Inversiones Principales",
+                advisory_services: "Servicios de Asesoría",
+                about: "Acerca de",
+                how_it_works: "Cómo Funciona",
+                referral: "Referidos",
+                activity: "Actividad",
+                why_choose_us: "Por Qué Elegirnos",
+                contact: "Contacto",
+                galaxy_digital: "Galaxy Digital Holdings",
+                
+                // Hero
+                hero_title_1: "Líder Global en Activos Digitales y Blockchain",
+                hero_desc_1: "Galaxy Digital Holdings es una empresa diversificada de servicios financieros y gestión de inversiones en el sector de activos digitales, criptomonedas y tecnología blockchain.",
+                invest_now: "Invertir Ahora",
+                
+                hero_title_2: "Soluciones Financieras Innovadoras",
+                hero_desc_2: "Proporcionamos a instituciones y clientes directos un conjunto completo de soluciones financieras que abarcan el ecosistema de activos digitales.",
+                get_started: "Comenzar",
+                
+                hero_title_3: "Plataforma Segura y Regulada",
+                hero_desc_3: "Nuestra plataforma opera con los más altos estándares de seguridad y cumplimiento normativo para proteger sus inversiones.",
+                join_now: "Únete Ahora",
+                
+                // Features
+                why_choose_title: "Por Qué Elegir Galaxy Digital Holdings",
+                secure_title: "Seguro y Regulado",
+                secure_desc: "Nuestra plataforma opera con los más altos estándares de seguridad y cumplimiento normativo para proteger sus inversiones.",
+                tech_title: "Tecnología Avanzada",
+                tech_desc: "Aproveche la tecnología blockchain de vanguardia y la infraestructura comercial para un rendimiento óptimo.",
+                diverse_title: "Opciones de Inversión Diversas",
+                diverse_desc: "Acceda a una amplia gama de activos digitales y productos de inversión adaptados a sus objetivos financieros.",
+                
+                // Services
+                our_services: "Nuestros Servicios",
+                trading_desc: "Servicios integrales de negociación en múltiples activos digitales con liquidez profunda y precios competitivos.",
+                asset_desc: "Gestión profesional de carteras de activos digitales para inversores institucionales y acreditados.",
+                investment_banking: "Banca de Inversión",
+                banking_desc: "Servicios de asesoramiento estratégico y captación de capital para empresas de blockchain y activos digitales.",
+                learn_more: "Más Información",
+                
+                // About
+                about_title: "Acerca de Galaxy Digital Holdings",
+                about_desc_1: "Galaxy Digital Holdings Ltd. es una empresa de servicios financieros y gestión de inversiones impulsada por la tecnología que proporciona a instituciones y clientes directos un conjunto completo de soluciones financieras que abarcan el ecosistema de activos digitales.",
+                about_desc_2: "Fundada en 2018, nuestra empresa se ha convertido en un líder global en el espacio de activos digitales, con oficinas en Nueva York, Londres, Hong Kong y Singapur.",
+                about_desc_3: "Nuestro diverso equipo de profesionales aporta décadas de experiencia de los sectores de finanzas tradicionales y tecnología emergente, lo que nos permite cerrar la brecha entre los mercados financieros convencionales y el ecosistema de activos digitales.",
+                our_story: "Nuestra Historia",
+                
+                // How It Works
+                how_it_works_title: "¡Sigue Estos Tres Sencillos Pasos para Unirte a Nosotros!",
+                step_1_title: "Inicia sesión en nuestro sitio web",
+                step_1_desc: "En nuestro sitio web, haz clic en el botón ÚNETE AHORA para comenzar tu viaje de inversión.",
+                step_2_title: "Crea una cuenta gratuita",
+                step_2_desc: "Proporciona tus datos para crear una cuenta gratuita y verificar tu identidad.",
+                step_3_title: "Selecciona una inversión",
+                step_3_desc: "Elige un plan y deposita para comenzar a ganar con nuestras diversas opciones de inversión.",
+                start_investing: "Comienza a Invertir Ahora",
+                
+                // Referral
+                referral_program: "PROGRAMA DE REFERIDOS",
+                commission: "5.00% de Comisión",
+                referral_title: "Comparte Tu Enlace y Gana Recompensas",
+                referral_desc: "Únete a nuestro programa de referidos de múltiples niveles y obtén ingresos adicionales invitando a nuevos inversores a la plataforma. Comparte tu enlace de referido y obtén el 5% de los depósitos de tus referidos directos realizados desde una billetera externa en cualquier plan del sistema.",
+                copy_link: "Copiar Enlace",
+                view_dashboard: "Ver Panel de Referidos",
+                
+                // Activity
+                recent_activity: "Actividad Reciente de la Plataforma",
+                latest_deposits: "Últimos Depósitos",
+                latest_withdrawals: "Últimos Retiros",
+                
+                // Why Choose Us
+                hedge_funds: "Fondos de Cobertura",
+                cryptoassets: "Criptoactivos",
+                portfolio: "Cartera",
+                hedge_funds_title: "Inversiones Estratégicas en Fondos de Cobertura",
+                hedge_funds_desc_1: "Nuestros fondos están diversificados para incluir protocolos y empresas de blockchain, asegurando un enfoque equilibrado para las inversiones en activos digitales.",
+                hedge_funds_desc_2: "Empleamos estrategias sofisticadas de gestión de riesgos y aprovechamos nuestra profunda experiencia en el mercado para maximizar los rendimientos mientras minimizamos la exposición.",
+                hedge_funds_desc_3: "Nuestras estrategias de fondos de cobertura están diseñadas para capitalizar las ineficiencias del mercado y las oportunidades emergentes en el espacio de activos digitales en rápida evolución.",
+                cryptoassets_title: "Asignación Estratégica de Criptoactivos",
+                cryptoassets_desc_1: "Nuestros fondos se centran en tokens que incentivan las acciones principales de un protocolo y/o sobresalen en el desarrollo de mecanismos novedosos para contratos inteligentes.",
+                cryptoassets_desc_2: "Realizamos una diligencia debida exhaustiva en cada criptoactivo, evaluando tecnología, equipo, tokenómica y potencial de mercado antes de tomar decisiones de inversión.",
+                cryptoassets_desc_3: "Nuestro enfoque combina análisis fundamental con indicadores técnicos para identificar proyectos prometedores con potencial de crecimiento a largo plazo.",
+                portfolio_title: "Estrategia de Cartera Diversificada",
+                portfolio_desc_1: "Además de los criptoactivos establecidos, invertimos en ventas de tokens iniciales que interactúan con un negocio o producto real en el ecosistema blockchain.",
+                portfolio_desc_2: "Nuestra metodología de construcción de carteras enfatiza la diversificación entre sectores, etapas y perfiles de riesgo para optimizar los rendimientos ajustados al riesgo.",
+                portfolio_desc_3: "Monitoreamos y rebalanceamos continuamente nuestras carteras para adaptarnos a las condiciones cambiantes del mercado y capitalizar las oportunidades emergentes.",
+                
+                // Videos
+                featured_videos: "Videos Destacados",
+                company_intro: "Introducción de la Empresa",
+                company_intro_desc: "Conozca nuestra misión, valores y los servicios que ofrecemos a nuestros clientes.",
+                
+                // Certification
+                our_certification: "Nuestra Certificación",
+                certification_title: "Certificación Galaxy Digital Holdings",
+                certification_desc: "Estamos orgullosos de ser reconocidos oficialmente por Galaxy Digital Holdings. Esta certificación destaca nuestra dedicación a la innovación, transparencia y excelencia en la industria de activos digitales y servicios financieros.",
+                
+                // Stats
+                assets_managed: "Activos Bajo Gestión",
+                employees: "Empleados Globales",
+                countries: "Países Atendidos",
+                year_founded: "Año de Fundación",
+                
+                // Testimonials
+                testimonials: "Lo Que Dicen Nuestros Clientes",
+                testimonial_1: "\"Galaxy Digital ha sido un socio invaluable para navegar en el complejo mundo de los activos digitales. Su experiencia y conocimiento del mercado han mejorado significativamente nuestra estrategia de inversión.\"",
+                testimonial_2: "\"El equipo de Galaxy Digital proporcionó una orientación excepcional durante nuestra oferta de tokens. Su enfoque integral y conexiones en la industria fueron fundamentales para nuestro éxito.\"",
+                testimonial_3: "\"Como oficina familiar, necesitábamos un socio confiable que nos ayudara a asignar activos digitales. El enfoque institucional y las medidas de seguridad de Galaxy Digital nos dieron total confianza.\"",
+                cfo: "CFO, TechGrowth Inc.",
+                ceo: "CEO, Soluciones Blockchain",
+                managing_partner: "Socio Gerente, Heritage Capital",
+                
+                // Contact
+                get_in_touch: "Ponte en Contacto",
+                select_service: "Selecciona Interés de Servicio",
+                submit_inquiry: "Enviar Consulta",
+                
+                // Footer
+                footer_desc: "Líder global en servicios financieros de activos digitales, proporcionando a instituciones y clientes directos soluciones innovadoras en todo el ecosistema de activos digitales.",
+                quick_links: "Enlaces Rápidos",
+                address: "dirección principal en 300 Vesey Street, Nueva York, NY",
+                all_rights: "Todos los Derechos Reservados."
+            },
+            fr: {
+                // Header
+                phone: "+12058870897",
+                email: "info@galaxydigital.com",
+                login: "Connexion",
+                home: "Accueil",
+                services: "Services",
+                investment_management: "Gestion d'Investissement",
+                trading_market_making: "Négociation et Tenue de Marché",
+                asset_management: "Gestion d'Actifs",
+                principal_investments: "Investissements Principaux",
+                advisory_services: "Services de Conseil",
+                about: "À Propos",
+                how_it_works: "Comment Ça Marche",
+                referral: "Parrainage",
+                activity: "Activité",
+                why_choose_us: "Pourquoi Nous Choisir",
+                contact: "Contact",
+                galaxy_digital: "Galaxy Digital Holdings",
+                
+                // Hero
+                hero_title_1: "Leader Mondial des Actifs Numériques et de la Blockchain",
+                hero_desc_1: "Galaxy Digital Holdings est une société de services financiers diversifiée et de gestion d'investissement dans le secteur des actifs numériques, des cryptomonnaies et de la technologie blockchain.",
+                invest_now: "Investir Maintenant",
+                
+                hero_title_2: "Solutions Financières Innovantes",
+                hero_desc_2: "Fournissant aux institutions et aux clients directs une gamme complète de solutions financières couvrant l'écosystème des actifs numériques.",
+                get_started: "Commencer",
+                
+                hero_title_3: "Plateforme Sécurisée et Réglementée",
+                hero_desc_3: "Notre plateforme fonctionne avec les normes de sécurité les plus élevées et la conformité réglementaire pour protéger vos investissements.",
+                join_now: "Rejoindre Maintenant",
+                
+                // Features
+                why_choose_title: "Pourquoi Choisir Galaxy Digital Holdings",
+                secure_title: "Sécurisé et Réglementé",
+                secure_desc: "Notre plateforme fonctionne avec les normes de sécurité les plus élevées et la conformité réglementaire pour protéger vos investissements.",
+                tech_title: "Technologie Avancée",
+                tech_desc: "Tirez parti de la technologie blockchain de pointe et de l'infrastructure de trading pour des performances optimales.",
+                diverse_title: "Options d'Investissement Diversifiées",
+                diverse_desc: "Accédez à un large éventail d'actifs numériques et de produits d'investissement adaptés à vos objectifs financiers.",
+                
+                // Services
+                our_services: "Nos Services",
+                trading_desc: "Services de négociation complets sur plusieurs actifs numériques avec une liquidité profonde et des prix compétitifs.",
+                asset_desc: "Gestion professionnelle de portefeuilles d'actifs numériques pour les investisseurs institutionnels et accrédités.",
+                investment_banking: "Banque d'Investissement",
+                banking_desc: "Services de conseil stratégique et de levée de capitaux pour les entreprises de blockchain et d'actifs numériques.",
+                learn_more: "En Savoir Plus",
+                
+                // About
+                about_title: "À Propos de Galaxy Digital Holdings",
+                about_desc_1: "Galaxy Digital Holdings Ltd. est une société de services financiers et de gestion d'investissement axée sur la technologie qui fournit aux institutions et aux clients directs une gamme complète de solutions financières couvrant l'écosystème des actifs numériques.",
+                about_desc_2: "Fondée en 2018, notre entreprise est devenue un leader mondial dans le domaine des actifs numériques, avec des bureaux à New York, Londres, Hong Kong et Singapour.",
+                about_desc_3: "Notre équipe diversifiée de professionnels apporte des décennies d'expérience des secteurs de la finance traditionnelle et des technologies émergentes, nous permettant de combler le fossé entre les marchés financiers conventionnels et l'écosystème des actifs numériques.",
+                our_story: "Notre Histoire",
+                
+                // How It Works
+                how_it_works_title: "Suivez Ces Trois Étapes Simples pour Nous Rejoindre!",
+                step_1_title: "Connectez-vous à notre site web",
+                step_1_desc: "Sur notre site web, cliquez sur le bouton REJOINDRE MAINTENANT pour commencer votre parcours d'investissement.",
+                step_2_title: "Créez un compte gratuit",
+                step_2_desc: "Fournissez vos détails pour créer un compte gratuit et vérifier votre identité.",
+                step_3_title: "Sélectionnez un investissement",
+                step_3_desc: "Choisissez un plan et déposez pour commencer à gagner avec nos diverses options d'investissement.",
+                start_investing: "Commencez à Investir Maintenant",
+                
+                // Referral
+                referral_program: "PROGRAMME DE PARRAINAGE",
+                commission: "5.00% de Commission",
+                referral_title: "Partagez Votre Lien et Gagnez des Récompenses",
+                referral_desc: "Rejoignez notre programme de parrainage multi-niveaux et obtenez un revenu supplémentaire en invitant de nouveaux investisseurs sur la plateforme. Partagez votre lien de parrainage et obtenez 5% des dépôts de vos filleuls directs effectués depuis un portefeuille externe sur tous les plans du système.",
+                copy_link: "Copier le Lien",
+                view_dashboard: "Voir le Tableau de Bord de Parrainage",
+                
+                // Activity
+                recent_activity: "Activité Récente de la Plateforme",
+                latest_deposits: "Derniers Dépôts",
+                latest_withdrawals: "Derniers Retraits",
+                
+                // Why Choose Us
+                hedge_funds: "Fonds de Couverture",
+                cryptoassets: "Cryptoactifs",
+                portfolio: "Portefeuille",
+                hedge_funds_title: "Investissements Stratégiques dans les Fonds de Couverture",
+                hedge_funds_desc_1: "Nos fonds sont diversifiés pour inclure des protocoles et des entreprises blockchain, assurant une approche équilibrée des investissements en actifs numériques.",
+                hedge_funds_desc_2: "Nous employons des stratégies sophistiquées de gestion des risques et tirons parti de notre expertise approfondie du marché pour maximiser les rendements tout en minimisant l'exposition.",
+                hedge_funds_desc_3: "Nos stratégies de fonds de couverture sont conçues pour capitaliser sur les inefficacités du marché et les opportunités émergentes dans l'espace des actifs numériques en évolution rapide.",
+                cryptoassets_title: "Allocation Stratégique de Cryptoactifs",
+                cryptoassets_desc_1: "Nos fonds se concentrent sur les jetons qui incitent les actions principales d'un protocole et/ou excellent dans le développement de mécanismes novateurs pour les contrats intelligents.",
+                cryptoassets_desc_2: "Nous effectuons une diligence raisonnable approfondie sur chaque cryptoactif, évaluant la technologie, l'équipe, la tokenomique et le potentiel de marché avant de prendre des décisions d'investissement.",
+                cryptoassets_desc_3: "Notre approche combine l'analyse fondamentale avec les indicateurs techniques pour identifier des projets prometteurs avec un potentiel de croissance à long terme.",
+                portfolio_title: "Stratégie de Portefeuille Diversifiée",
+                portfolio_desc_1: "En plus des cryptoactifs établis, nous investissons dans les ventes de jetons précoces qui interagissent avec une entreprise ou un produit réel dans l'écosystème blockchain.",
+                portfolio_desc_2: "Notre méthodologie de construction de portefeuille met l'accent sur la diversification entre les secteurs, les étapes et les profils de risque pour optimiser les rendements ajustés au risque.",
+                portfolio_desc_3: "Nous surveillons et rééquilibrons continuellement nos portefeuilles pour nous adapter aux conditions changeantes du marché et capitaliser sur les opportunités émergentes.",
+                
+                // Videos
+                featured_videos: "Vidéos en Vedette",
+                company_intro: "Présentation de l'Entreprise",
+                company_intro_desc: "Découvrez notre mission, nos valeurs et les services que nous proposons à nos clients.",
+                
+                // Certification
+                our_certification: "Notre Certification",
+                certification_title: "Certification Galaxy Digital Holdings",
+                certification_desc: "Nous sommes fiers d'être officiellement reconnus par Galaxy Digital Holdings. Cette certification met en lumière notre dévouement à l'innovation, la transparence et l'excellence dans l'industrie des actifs numériques et des services financiers.",
+                
+                // Stats
+                assets_managed: "Actifs Sous Gestion",
+                employees: "Employés Mondiaux",
+                countries: "Pays Desservis",
+                year_founded: "Année de Fondation",
+                
+                // Testimonials
+                testimonials: "Ce Que Disent Nos Clients",
+                testimonial_1: "\"Galaxy Digital a été un partenaire inestimable pour naviguer dans le monde complexe des actifs numériques. Leur expertise et leur perspicacité sur le marché ont considérablement amélioré notre stratégie d'investissement.\"",
+                testimonial_2: "\"L'équipe de Galaxy Digital a fourni des conseils exceptionnels lors de notre offre de jetons. Leur approche globale et leurs connexions dans l'industrie ont été déterminantes pour notre succès.\"",
+                testimonial_3: "\"En tant que family office, nous avions besoin d'un partenaire de confiance pour nous aider à allouer des actifs numériques. L'approche institutionnelle et les mesures de sécurité de Galaxy Digital nous ont donné une confiance totale.\"",
+                cfo: "CFO, TechGrowth Inc.",
+                ceo: "PDG, Solutions Blockchain",
+                managing_partner: "Associé Gérant, Heritage Capital",
+                
+                // Contact
+                get_in_touch: "Entrer en Contact",
+                select_service: "Sélectionner l'Intérêt du Service",
+                submit_inquiry: "Soumettre une Demande",
+                
+                // Footer
+                footer_desc: "Leader mondial des services financiers d'actifs numériques, fournissant aux institutions et aux clients directs des solutions innovantes dans tout l'écosystème des actifs numériques.",
+                quick_links: "Liens Rapides",
+                address: "adresse principale au 300 Vesey Street, New York, NY",
+                all_rights: "Tous Droits Réservés."
+            },
+            de: {
+                // Header
+                phone: "+12058870897",
+                email: "info@galaxydigital.com",
+                login: "Anmelden",
+                home: "Startseite",
+                services: "Dienstleistungen",
+                investment_management: "Anlageverwaltung",
+                trading_market_making: "Handel und Market Making",
+                asset_management: "Vermögensverwaltung",
+                principal_investments: "Haupteinlagen",
+                advisory_services: "Beratungsdienstleistungen",
+                about: "Über uns",
+                how_it_works: "So Funktioniert's",
+                referral: "Empfehlungsprogramm",
+                activity: "Aktivität",
+                why_choose_us: "Warum Uns Wählen",
+                contact: "Kontakt",
+                galaxy_digital: "Galaxy Digital Holdings",
+                
+                // Hero
+                hero_title_1: "Globaler Marktführer für digitale Assets und Blockchain",
+                hero_desc_1: "Galaxy Digital Holdings ist ein diversifiziertes Finanzdienstleistungs- und Investmentmanagement-Unternehmen im Bereich digitale Assets, Kryptowährungen und Blockchain-Technologie.",
+                invest_now: "Jetzt Investieren",
+                
+                hero_title_2: "Innovative Finanzlösungen",
+                hero_desc_2: "Bietet Institutionen und Direktkunden eine vollständige Palette von Finanzlösungen, die das Ökosystem der digitalen Vermögenswerte abdecken.",
+                get_started: "Loslegen",
+                
+                hero_title_3: "Sichere und Regulierte Plattform",
+                hero_desc_3: "Unsere Plattform arbeitet mit den höchsten Sicherheitsstandards und regulatorischer Compliance, um Ihre Investitionen zu schützen.",
+                join_now: "Jetzt Beitreten",
+                
+                // Features
+                why_choose_title: "Warum Galaxy Digital Holdings Wählen",
+                secure_title: "Sicher und Reguliert",
+                secure_desc: "Unsere Plattform arbeitet mit den höchsten Sicherheitsstandards und regulatorischer Compliance, um Ihre Investitionen zu schützen.",
+                tech_title: "Fortschrittliche Technologie",
+                tech_desc: "Nutzen Sie modernste Blockchain-Technologie und Handelsinfrastruktur für optimale Leistung.",
+                diverse_title: "Vielfältige Anlagemöglichkeiten",
+                diverse_desc: "Zugang zu einer breiten Palette digitaler Vermögenswerte und Anlageprodukte, die auf Ihre finanziellen Ziele zugeschnitten sind.",
+                
+                // Services
+                our_services: "Unsere Dienstleistungen",
+                trading_desc: "Umfassende Handelsdienstleistungen über mehrere digitale Vermögenswerte mit hoher Liquidität und wettbewerbsfähigen Preisen.",
+                asset_desc: "Professionelles Management von Portfolios digitaler Vermögenswerte für institutionelle und akkreditierte Investoren.",
+                investment_banking: "Investment Banking",
+                banking_desc: "Strategische Beratung und Kapitalbeschaffungsdienstleistungen für Blockchain- und digitale Asset-Unternehmen.",
+                learn_more: "Mehr Erfahren",
+                
+                // About
+                about_title: "Über Galaxy Digital Holdings",
+                about_desc_1: "Galaxy Digital Holdings Ltd. ist ein technologiegesteuertes Finanzdienstleistungs- und Investmentmanagement-Unternehmen, das Institutionen und Direktkunden eine vollständige Palette von Finanzlösungen bietet, die das Ökosystem der digitalen Vermögenswerte abdecken.",
+                about_desc_2: "Gegründet im Jahr 2018, ist unser Unternehmen zu einem globalen Marktführer im Bereich der digitalen Vermögenswerte geworden, mit Büros in New York, London, Hongkong und Singapur.",
+                about_desc_3: "Unser vielfältiges Team von Fachleuten bringt jahrzehntelange Erfahrung aus den Bereichen traditionelle Finanzen und aufstrebende Technologien mit und ermöglicht es uns, die Lücke zwischen konventionellen Finanzmärkten und dem Ökosystem der digitalen Vermögenswerte zu schließen.",
+                our_story: "Unsere Geschichte",
+                
+                // How It Works
+                how_it_works_title: "Folgen Sie diesen drei einfachen Schritten, um uns beizutreten!",
+                step_1_title: "Melden Sie sich auf unserer Website an",
+                step_1_desc: "Klicken Sie auf unserer Website auf die Schaltfläche JETZT BEITRETEN, um Ihre Anlagereise zu beginnen.",
+                step_2_title: "Erstellen Sie ein kostenloses Konto",
+                step_2_desc: "Geben Sie Ihre Daten an, um ein kostenloses Konto zu erstellen und Ihre Identität zu verifizieren.",
+                step_3_title: "Wählen Sie eine Investition",
+                step_3_desc: "Wählen Sie einen Plan und zahlen Sie ein, um mit unseren vielfältigen Anlagemöglichkeiten zu verdienen.",
+                start_investing: "Jetzt mit dem Investieren beginnen",
+                
+                // Referral
+                referral_program: "EMPFEHLUNGSPROGRAMM",
+                commission: "5,00% Provision",
+                referral_title: "Teilen Sie Ihren Link und verdienen Sie Belohnungen",
+                referral_desc: "Nehmen Sie an unserem mehrstufigen Empfehlungsprogramm teil und erhalten Sie zusätzliches Einkommen, indem Sie neue Investoren auf die Plattform einladen. Teilen Sie Ihren Empfehlungslink und erhalten Sie 5% der Einzahlungen Ihrer direkten Empfehlungen, die von einer externen Wallet auf beliebige Pläne des Systems getätigt werden.",
+                copy_link: "Link Kopieren",
+                view_dashboard: "Empfehlungs-Dashboard Anzeigen",
+                
+                // Activity
+                recent_activity: "Aktuelle Plattformaktivität",
+                latest_deposits: "Letzte Einzahlungen",
+                latest_withdrawals: "Letzte Abhebungen",
+                
+                // Why Choose Us
+                hedge_funds: "Hedgefonds",
+                cryptoassets: "Kryptoassets",
+                portfolio: "Portfolio",
+                hedge_funds_title: "Strategische Hedgefonds-Investitionen",
+                hedge_funds_desc_1: "Unsere Fonds sind diversifiziert, um Protokolle und Blockchain-Unternehmen einzubeziehen, was einen ausgewogenen Ansatz für Investitionen in digitale Vermögenswerte gewährleistet.",
+                hedge_funds_desc_2: "Wir setzen ausgefeilte Risikomanagement-Strategien ein und nutzen unsere tiefgreifende Marktexpertise, um Erträge zu maximieren und gleichzeitig das Risiko zu minimieren.",
+                hedge_funds_desc_3: "Unsere Hedgefonds-Strategien sind darauf ausgelegt, Marktineffizienzen und aufkommende Chancen im sich schnell entwickelnden Bereich der digitalen Vermögenswerte zu nutzen.",
+                cryptoassets_title: "Strategische Kryptoasset-Allokation",
+                cryptoassets_desc_1: "Unsere Fonds konzentrieren sich auf Token, die die Kernaktionen eines Protokolls incentivieren und/oder bei der Entwicklung neuartiger Mechanismen für Smart Contracts hervorstechen.",
+                cryptoassets_desc_2: "Wir führen eine gründliche Due-Diligence-Prüfung für jedes Kryptoasset durch, bewerten Technologie, Team, Tokenomics und Marktpotenzial, bevor wir Investitionsentscheidungen treffen.",
+                cryptoassets_desc_3: "Unser Ansatz kombiniert Fundamentalanalyse mit technischen Indikatoren, um vielversprechende Projekte mit langfristigem Wachstumspotenzial zu identifizieren.",
+                portfolio_title: "Diversifizierte Portfolio-Strategie",
+                portfolio_desc_1: "Zusätzlich zu etablierten Kryptoassets investieren wir in frühe Token-Verkäufe, die mit einem tatsächlichen Geschäft oder Produkt im Blockchain-Ökosystem interagieren.",
+                portfolio_desc_2: "Unsere Portfolio-Konstruktionsmethodik betont die Diversifizierung über Sektoren, Phasen und Risikoprofile hinweg, um risikoadjustierte Renditen zu optimieren.",
+                portfolio_desc_3: "Wir überwachen und rebalancieren unsere Portfolios kontinuierlich, um uns an sich ändernde Marktbedingungen anzupassen und aufkommende Chancen zu nutzen.",
+                
+                // Videos
+                featured_videos: "Ausgewählte Videos",
+                company_intro: "Unternehmensvorstellung",
+                company_intro_desc: "Erfahren Sie mehr über unsere Mission, Werte und die Dienstleistungen, die wir unseren Kunden anbieten.",
+                
+                // Certification
+                our_certification: "Unsere Zertifizierung",
+                certification_title: "Galaxy Digital Holdings Zertifizierung",
+                certification_desc: "Wir sind stolz darauf, offiziell von Galaxy Digital Holdings anerkannt zu werden. Diese Zertifizierung unterstreicht unser Engagement für Innovation, Transparenz und Exzellenz in der digitalen Asset- und Finanzdienstleistungsbranche.",
+                
+                // Stats
+                assets_managed: "Verwaltetes Vermögen",
+                employees: "Globale Mitarbeiter",
+                countries: "Bediente Länder",
+                year_founded: "Gründungsjahr",
+                
+                // Testimonials
+                testimonials: "Was Unsere Kunden Sagen",
+                testimonial_1: "\"Galaxy Digital war ein unschätzbarer Partner bei der Navigation durch die komplexe Welt der digitalen Vermögenswerte. Deren Expertise und Markteinblicke haben unsere Anlagestrategie erheblich verbessert.\"",
+                testimonial_2: "\"Das Team von Galaxy Digital bot während unseres Token-Angebots außergewöhnliche Beratung. Deren umfassender Ansatz und Branchenkontakte waren entscheidend für unseren Erfolg.\"",
+                testimonial_3: "\"Als Family Office benötigten wir einen vertrauenswürdigen Partner, der uns bei der Allokation von digitalen Vermögenswerten hilft. Der institutionelle Ansatz und die Sicherheitsmaßnahmen von Galaxy Digital gaben uns volles Vertrauen.\"",
+                cfo: "CFO, TechGrowth Inc.",
+                ceo: "CEO, Blockchain-Lösungen",
+                managing_partner: "Geschäftsführender Gesellschafter, Heritage Capital",
+                
+                // Contact
+                get_in_touch: "Kontakt Aufnehmen",
+                select_service: "Service-Interesse Auswählen",
+                submit_inquiry: "Anfrage Senden",
+                
+                // Footer
+                footer_desc: "Globaler Marktführer für Finanzdienstleistungen im Bereich digitale Assets, der Institutionen und Direktkunden innovative Lösungen im gesamten Ökosystem der digitalen Vermögenswerte bietet.",
+                quick_links: "Schnelllinks",
+                address: "Hauptadresse: 300 Vesey Street, New York, NY",
+                all_rights: "Alle Rechte vorbehalten."
+            },
+            zh: {
+                // Header
+                phone: "+12058870897",
+                email: "info@galaxydigital.com",
+                login: "登录",
+                home: "首页",
+                services: "服务",
+                investment_management: "投资管理",
+                trading_market_making: "交易与做市",
+                asset_management: "资产管理",
+                principal_investments: "主要投资",
+                advisory_services: "咨询服务",
+                about: "关于我们",
+                how_it_works: "运作方式",
+                referral: "推荐计划",
+                activity: "活动",
+                why_choose_us: "为何选择我们",
+                contact: "联系我们",
+                galaxy_digital: "Galaxy Digital Holdings",
+                
+                // Hero
+                hero_title_1: "全球数字资产与区块链领导者",
+                hero_desc_1: "Galaxy Digital Holdings 是一家多元化的金融服务和投资管理公司，专注于数字资产、加密货币和区块链技术领域。",
+                invest_now: "立即投资",
+                
+                hero_title_2: "创新金融解决方案",
+                hero_desc_2: "为机构和直接客户提供涵盖数字资产生态系统的全套金融解决方案。",
+                get_started: "开始使用",
+                
+                hero_title_3: "安全合规的平台",
+                hero_desc_3: "我们的平台以最高安全标准和监管合规性运营，以保护您的投资。",
+                join_now: "立即加入",
+                
+                // Features
+                why_choose_title: "为何选择 Galaxy Digital Holdings",
+                secure_title: "安全合规",
+                secure_desc: "我们的平台以最高安全标准和监管合规性运营，以保护您的投资。",
+                tech_title: "先进技术",
+                tech_desc: "利用尖端的区块链技术和交易基础设施，实现最佳性能。",
+                diverse_title: "多元化投资选择",
+                diverse_desc: "访问广泛的数字资产和投资产品，根据您的财务目标量身定制。",
+                
+                // Services
+                our_services: "我们的服务",
+                trading_desc: "跨多个数字资产的全面交易服务，具有深度流动性和有竞争力的价格。",
+                asset_desc: "为机构和合格投资者提供数字资产组合的专业管理。",
+                investment_banking: "投资银行",
+                banking_desc: "为区块链和数字资产公司提供战略咨询和资本筹集服务。",
+                learn_more: "了解更多",
+                
+                // About
+                about_title: "关于 Galaxy Digital Holdings",
+                about_desc_1: "Galaxy Digital Holdings Ltd. 是一家技术驱动的金融服务和投资管理公司，为机构和直接客户提供涵盖数字资产生态系统的全套金融解决方案。",
+                about_desc_2: "公司成立于2018年，已发展成为数字资产领域的全球领导者，在纽约、伦敦、香港和新加坡设有办事处。",
+                about_desc_3: "我们多元化的专业团队拥有来自传统金融和新兴技术领域的数十年经验，使我们能够弥合传统金融市场与数字资产生态系统之间的差距。",
+                our_story: "我们的故事",
+                
+                // How It Works
+                how_it_works_title: "跟随这三个简单步骤加入我们！",
+                step_1_title: "登录我们的网站",
+                step_1_desc: "在我们的网站上，点击“立即加入”按钮开始您的投资之旅。",
+                step_2_title: "创建免费账户",
+                step_2_desc: "提供您的详细信息以创建免费账户并验证您的身份。",
+                step_3_title: "选择投资",
+                step_3_desc: "选择一个计划并存款，开始通过我们多样化的投资选项赚取收益。",
+                start_investing: "立即开始投资",
+                
+                // Referral
+                referral_program: "推荐计划",
+                commission: "5.00% 佣金",
+                referral_title: "分享您的链接并赚取奖励",
+                referral_desc: "加入我们的多级推荐计划，通过邀请新投资者到平台获得额外收入。分享您的推荐链接，并从您直接推荐人从外部钱包对系统任何计划的存款中获得5%的佣金。",
+                copy_link: "复制链接",
+                view_dashboard: "查看推荐仪表板",
+                
+                // Activity
+                recent_activity: "平台近期活动",
+                latest_deposits: "最新存款",
+                latest_withdrawals: "最新提款",
+                
+                // Why Choose Us
+                hedge_funds: "对冲基金",
+                cryptoassets: "加密资产",
+                portfolio: "投资组合",
+                hedge_funds_title: "战略性对冲基金投资",
+                hedge_funds_desc_1: "我们的基金多元化，包括协议和区块链公司，确保对数字资产投资采取平衡的方法。",
+                hedge_funds_desc_2: "我们采用复杂的风险管理策略，并利用我们深厚的市场专业知识，在最小化风险的同时最大化回报。",
+                hedge_funds_desc_3: "我们的对冲基金策略旨在利用快速发展的数字资产领域的市场低效率和新兴机会。",
+                cryptoassets_title: "战略性加密资产配置",
+                cryptoassets_desc_1: "我们的基金专注于激励协议核心行动和/或在开发智能合约新颖机制方面表现出色的代币。",
+                cryptoassets_desc_2: "我们在做出投资决策前对每个加密资产进行彻底的尽职调查，评估技术、团队、代币经济学和市场潜力。",
+                cryptoassets_desc_3: "我们的方法结合基本面分析和技术指标，以识别具有长期增长潜力的有前景项目。",
+                portfolio_title: "多元化投资组合策略",
+                portfolio_desc_1: "除了已建立的加密资产外，我们还投资于与区块链生态系统中的实际业务或产品互动的早期代币销售。",
+                portfolio_desc_2: "我们的投资组合构建方法强调跨行业、阶段和风险状况的多元化，以优化风险调整后的回报。",
+                portfolio_desc_3: "我们持续监控和重新平衡我们的投资组合，以适应不断变化的市场条件并利用新兴机会。",
+                
+                // Videos
+                featured_videos: "精选视频",
+                company_intro: "公司介绍",
+                company_intro_desc: "了解我们的使命、价值观以及我们为客户提供的服务。",
+                
+                // Certification
+                our_certification: "我们的认证",
+                certification_title: "Galaxy Digital Holdings 认证",
+                certification_desc: "我们很自豪获得 Galaxy Digital Holdings 的官方认可。此认证彰显了我们在数字资产和金融服务行业对创新、透明度和卓越的奉献精神。",
+                
+                // Stats
+                assets_managed: "管理资产",
+                employees: "全球员工",
+                countries: "服务国家",
+                year_founded: "成立年份",
+                
+                // Testimonials
+                testimonials: "客户评价",
+                testimonial_1: "\"Galaxy Digital 在导航复杂的数字资产世界方面一直是无价的合作伙伴。他们的专业知识和市场洞察力显著增强了我们的投资策略。\"",
+                testimonial_2: "\"Galaxy Digital 的团队在我们的代币发行期间提供了卓越的指导。他们全面的方法和行业联系对我们的成功起到了关键作用。\"",
+                testimonial_3: "\"作为家族办公室，我们需要一个值得信赖的合作伙伴来帮助我们配置数字资产。Galaxy Digital 的机构方法和安全措施给了我们完全的信心。\"",
+                cfo: "首席财务官，TechGrowth Inc.",
+                ceo: "首席执行官，区块链解决方案",
+                managing_partner: "管理合伙人，Heritage Capital",
+                
+                // Contact
+                get_in_touch: "取得联系",
+                select_service: "选择服务兴趣",
+                submit_inquiry: "提交咨询",
+                
+                // Footer
+                footer_desc: "数字资产金融服务领域的全球领导者，为机构和直接客户提供跨数字资产生态系统的创新解决方案。",
+                quick_links: "快速链接",
+                address: "主要地址：纽约州纽约市维西街300号",
+                all_rights: "保留所有权利。"
+            }
+        };
+
+        // Translation functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const languageSelector = document.getElementById('languageSelector');
+            const translationLoading = document.getElementById('translationLoading');
+            
+            // Set initial language
+            let currentLanguage = localStorage.getItem('preferredLanguage') || 'en';
+            languageSelector.value = currentLanguage;
+            translatePage(currentLanguage);
+            
+            // Language selector functionality
+            languageSelector.addEventListener('change', function() {
+                const selectedLanguage = this.value;
+                showTranslationLoading();
+                
+                // Simulate translation delay for better UX
+                setTimeout(() => {
+                    translatePage(selectedLanguage);
+                    hideTranslationLoading();
+                    localStorage.setItem('preferredLanguage', selectedLanguage);
+                }, 800);
+            });
+            
+            function translatePage(language) {
+                const elements = document.querySelectorAll('.translate');
+                
+                elements.forEach(element => {
+                    const key = element.getAttribute('data-key');
+                    if (translations[language] && translations[language][key]) {
+                        element.textContent = translations[language][key];
+                    }
+                });
+                
+                // Update HTML lang attribute
+                document.documentElement.lang = language;
+                
+                // Update form placeholders
+                updateFormPlaceholders(language);
+            }
+            
+            function updateFormPlaceholders(language) {
+                const formControls = document.querySelectorAll('.form-control');
+                formControls.forEach(control => {
+                    const placeholder = control.getAttribute('placeholder');
+                    if (placeholder) {
+                        const key = getTranslationKeyFromPlaceholder(placeholder, language);
+                        if (key && translations[language][key]) {
+                            control.setAttribute('placeholder', translations[language][key]);
+                        }
+                    }
+                });
+            }
+            
+            function getTranslationKeyFromPlaceholder(placeholder, language) {
+                // Simple mapping for form placeholders
+                const placeholderMap = {
+                    'First Name': 'first_name',
+                    'Last Name': 'last_name',
+                    'Email Address': 'email_address',
+                    'Phone Number': 'phone_number',
+                    'Your Message': 'your_message'
+                };
+                
+                return placeholderMap[placeholder];
+            }
+            
+            function showTranslationLoading() {
+                translationLoading.style.display = 'flex';
+            }
+            
+            function hideTranslationLoading() {
+                translationLoading.style.display = 'none';
+            }
+            
+            // Marquee functionality
+            const marqueeContent = document.querySelector('.marquee-content');
+            const marqueeItems = document.querySelectorAll('.marquee-item');
+            
+            // Duplicate content for seamless loop
+            marqueeItems.forEach(item => {
+                const clone = item.cloneNode(true);
+                marqueeContent.appendChild(clone);
+            });
+            
+            // Copy referral link functionality
+            const copyButton = document.querySelector('.btn-primary-custom[type="button"]');
+            if (copyButton) {
+                copyButton.addEventListener('click', function() {
+                    const referralInput = document.querySelector('.input-group input');
+                    referralInput.select();
+                    document.execCommand('copy');
+                    
+                    // Show translated alert
+                    const currentLang = languageSelector.value;
+                    let alertText = 'Referral link copied to clipboard!';
+                    if (currentLang === 'es') alertText = '¡Enlace de referencia copiado al portapapeles!';
+                    else if (currentLang === 'fr') alertText = 'Lien de parrainage copié dans le presse-papiers !';
+                    else if (currentLang === 'de') alertText = 'Empfehlungslink in die Zwischenablage kopiert!';
+                    else if (currentLang === 'zh') alertText = '推荐链接已复制到剪贴板！';
+                    
+                    alert(alertText);
+                });
+            }
+            
+            // Smooth scrolling for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    if (this.getAttribute('href') === '#') return;
+                    
+                    e.preventDefault();
+                    
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 80,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+    <!--Start of Tawk.to Script-->
+<script type="text/javascript">
+var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+(function(){
+var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+s1.async=true;
+s1.src='https://embed.tawk.to/68f14f9197663e194f2090fc/default';
+s1.charset='UTF-8';
+s1.setAttribute('crossorigin','*');
+s0.parentNode.insertBefore(s1,s0);
+})();
+</script>
+<!--End of Tawk.to Script-->
+</body>
+</html>
