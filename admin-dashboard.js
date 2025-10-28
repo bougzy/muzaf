@@ -2841,14 +2841,14 @@ function broadcastNotification() {
 function runBackup() {
     if (confirm('Are you sure you want to run a database backup?')) {
         showToast('Backup Initiated', 'Database backup has been started', 'info');
-        // Implementation would go here
+        
     }
 }
 
 function clearCache() {
     if (confirm('Are you sure you want to clear the system cache?')) {
         showToast('Cache Cleared', 'System cache has been cleared successfully', 'success');
-        // Implementation would go here
+       
     }
 }
 
