@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Galaxy Digital Holdings</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- TradingView Widget -->
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --info-color: #17a2b8;
+            --dark-color: #34495e;
+            --light-color: #ecf0f1;
+            --buy-color: #00c853;
+            --sell-color: #ff4444;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .sidebar {
+            background: linear-gradient(135deg, var(--primary-color), var(--dark-color));
+            color: white;
+            min-height: 100vh;
+            box-shadow: 3px 0 10px rgba(0,0,0,0.1);
+        }
+
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 12px 20px;
+            margin: 5px 0;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            background-color: rgba(255,255,255,0.1);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .sidebar .nav-link i {
+            width: 20px;
+            margin-right: 10px;
+        }
+
+        /* Trading Room Styles */
+        .trading-room {
+            background: #1e1e1e;
+            color: white;
+            min-height: 100vh;
+        }
+
+        .trading-header {
+            background: #2d2d2d;
+            border-bottom: 1px solid #404040;
+            padding: 10px 20px;
+        }
+
+        .trading-chart {
+            height: 500px;
+            background: #131722;
+            border: 1px solid #2a2e39;
+        }
+
+        .trading-panel {
+            background: #2d2d2d;
+            border-left: 1px solid #404040;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .order-form {
+            background: #2d2d2d;
+            padding: 20px;
+            border-bottom: 1px solid #404040;
+        }
+
+        .market-data {
+            background: #2d2d2d;
+            padding: 15px;
+        }
+
+        .position-item {
+            background: #363636;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 3px solid var(--success-color);
+        }
+
+        .position-item.sell {
+            border-left-color: var(--sell-color);
+        }
+
+        .order-book {
+            background: #2d2d2d;
+            padding: 15px;
+        }
+
+        .bid-row {
+            background: rgba(0, 200, 83, 0.1);
+            padding: 5px 10px;
+            margin: 2px 0;
+        }
+
+        .ask-row {
+            background: rgba(255, 68, 68, 0.1);
+            padding: 5px 10px;
+            margin: 2px 0;
+        }
+
+        .btn-buy {
+            background: var(--buy-color);
+            border: none;
+            color: white;
+            font-weight: bold;
+        }
+
+        .btn-sell {
+            background: var(--sell-color);
+            border: none;
+            color: white;
+            font-weight: bold;
+        }
+
+        .trading-tabs .nav-link {
+            color: #ccc;
+            border: none;
+            padding: 10px 20px;
+        }
+
+        .trading-tabs .nav-link.active {
+            background: #363636;
+            color: white;
+            border-bottom: 2px solid var(--secondary-color);
+        }
+
+        .instrument-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .instrument-item {
+            padding: 10px;
+            border-bottom: 1px solid #404040;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .instrument-item:hover {
+            background: #363636;
+        }
+
+        .instrument-item.active {
+            background: var(--secondary-color);
+        }
+
+        .price-up {
+            color: var(--buy-color);
+        }
+
+        .price-down {
+            color: var(--sell-color);
+        }
+
+        .indicator-settings {
+            background: #2d2d2d;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .timeframe-selector {
+            display: flex;
+            gap: 5px;
+            margin: 10px 0;
+        }
+
+        .timeframe-btn {
+            padding: 5px 10px;
+            border: 1px solid #404040;
+            background: #2d2d2d;
+            color: #ccc;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .timeframe-btn.active {
+            background: var(--secondary-color);
+            color: white;
+            border-color: var(--secondary-color);
+        }
+
+        /* Enhanced existing styles */
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            border: none;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--accent-color);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .websocket-status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            z-index: 1000;
+        }
+
+        .websocket-connected {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .websocket-disconnected {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        /* Trading specific styles */
+        .leverage-slider {
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        .risk-indicator {
+            height: 5px;
+            background: #404040;
+            border-radius: 5px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .risk-level {
+            height: 100%;
+            background: var(--success-color);
+            transition: width 0.3s;
+        }
+
+        .trading-alert {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
+            min-width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(135deg, var(--primary-color), var(--dark-color));">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-globe-americas me-2"></i>
+                Galaxy Digital Holdings
+            </a>
+            
+            <div class="d-flex align-items-center">
+                <!-- Notifications -->
+                <div class="dropdown me-3">
+                    <a href="#" class="text-white position-relative" id="notificationDropdown" data-bs-toggle="dropdown">
+                        <i class="fas fa-bell fa-lg"></i>
+                        <span class="notification-badge" id="notificationCount">0</span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-end p-3" style="width: 350px;">
+                        <h6 class="dropdown-header">Notifications</h6>
+                        <div id="notificationList">
+                            <!-- Notifications will be loaded here -->
+                        </div>
+                        <div class="text-center mt-2">
+                            <a href="#" class="text-decoration-none" onclick="loadNotifications()">View All</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Menu -->
+                <div class="dropdown">
+                    <a href="#" class="text-white text-decoration-none dropdown-toggle" data-bs-toggle="dropdown">
+                        <i class="fas fa-user-circle me-2"></i>
+                        <span id="userName">Loading...</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="#" onclick="showProfileModal()"><i class="fas fa-user me-2"></i>Profile</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="showReferralsModal()"><i class="fas fa-users me-2"></i>Referrals</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="#" onclick="logout()"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#" data-section="dashboard">
+                                <i class="fas fa-tachometer-alt"></i>
+                                Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-section="trading">
+                                <i class="fas fa-chart-bar"></i>
+                                Trading Room
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-section="deposit">
+                                <i class="fas fa-wallet"></i>
+                                Deposit Funds
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-section="invest">
+                                <i class="fas fa-chart-line"></i>
+                                Invest
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-section="transactions">
+                                <i class="fas fa-exchange-alt"></i>
+                                Transactions
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-section="earnings">
+                                <i class="fas fa-money-bill-wave"></i>
+                                Earnings
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-section="reports">
+                                <i class="fas fa-file-alt"></i>
+                                Reports
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-section="settings">
+                                <i class="fas fa-cog"></i>
+                                Settings
+                            </a>
+                        </li>
+                    </ul>
+
+                    <!-- Quick Stats -->
+                    <div class="mt-5 p-3 text-center" style="background: rgba(255,255,255,0.1); border-radius: 10px;">
+                        <small class="text-white-50">QUICK STATS</small>
+                        <div class="row mt-2 text-white">
+                            <div class="col-6">
+                                <small>This Week</small>
+                                <div class="fw-bold" id="quickWeekEarnings">$0</div>
+                            </div>
+                            <div class="col-6">
+                                <small>Referrals</small>
+                                <div class="fw-bold" id="quickReferrals">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+                <!-- Dashboard Section -->
+                <div id="dashboardSection">
+                    <!-- Your existing dashboard content -->
+                </div>
+
+                <!-- Trading Room Section -->
+                <div id="tradingSection" style="display: none;">
+                    <div class="trading-room">
+                        <!-- Trading Header -->
+                        <div class="trading-header d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <h4 class="mb-0 me-4">Trading Room</h4>
+                                <div class="timeframe-selector">
+                                    <button class="timeframe-btn active" data-timeframe="1">1m</button>
+                                    <button class="timeframe-btn" data-timeframe="5">5m</button>
+                                    <button class="timeframe-btn" data-timeframe="15">15m</button>
+                                    <button class="timeframe-btn" data-timeframe="30">30m</button>
+                                    <button class="timeframe-btn" data-timeframe="60">1h</button>
+                                    <button class="timeframe-btn" data-timeframe="240">4h</button>
+                                    <button class="timeframe-btn" data-timeframe="D">1D</button>
+                                    <button class="timeframe-btn" data-timeframe="W">1W</button>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <div class="me-3">
+                                    <span class="text-muted">Balance: </span>
+                                    <span class="fw-bold text-success" id="tradingBalance">$0.00</span>
+                                </div>
+                                <div class="me-3">
+                                    <span class="text-muted">Free Margin: </span>
+                                    <span class="fw-bold text-info" id="freeMargin">$0.00</span>
+                                </div>
+                                <button class="btn btn-sm btn-outline-light" onclick="showTradingSettings()">
+                                    <i class="fas fa-cog"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="row g-0">
+                            <!-- Left Panel - Chart -->
+                            <div class="col-lg-8 col-xl-9">
+                                <!-- Chart Container -->
+                                <div class="trading-chart" id="tradingChart"></div>
+                                
+                                <!-- Trading Tools -->
+                                <div class="bg-dark p-3 border-top border-secondary">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <h6 class="text-light mb-3">Technical Indicators</h6>
+                                            <div class="row g-2">
+                                                <div class="col-4">
+                                                    <button class="btn btn-sm btn-outline-light w-100" onclick="addIndicator('MACD')">MACD</button>
+                                                </div>
+                                                <div class="col-4">
+                                                    <button class="btn btn-sm btn-outline-light w-100" onclick="addIndicator('RSI')">RSI</button>
+                                                </div>
+                                                <div class="col-4">
+                                                    <button class="btn btn-sm btn-outline-light w-100" onclick="addIndicator('BB')">Bollinger</button>
+                                                </div>
+                                                <div class="col-4">
+                                                    <button class="btn btn-sm btn-outline-light w-100" onclick="addIndicator('SMA')">SMA</button>
+                                                </div>
+                                                <div class="col-4">
+                                                    <button class="btn btn-sm btn-outline-light w-100" onclick="addIndicator('EMA')">EMA</button>
+                                                </div>
+                                                <div class="col-4">
+                                                    <button class="btn btn-sm btn-outline-light w-100" onclick="addIndicator('Stoch')">Stochastic</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h6 class="text-light mb-3">Drawing Tools</h6>
+                                            <div class="row g-2">
+                                                <div class="col-3">
+                                                    <button class="btn btn-sm btn-outline-light w-100" onclick="activateTool('line')" title="Line">
+                                                        <i class="fas fa-minus"></i>
+                                                    </button>
+                                                </div>
+                                                <div class="col-3">
+                                                    <button class="btn btn-sm btn-outline-light w-100" onclick="activateTool('ray')" title="Ray">
+                                                        <i class="fas fa-long-arrow-alt-right"></i>
+                                                    </button>
+                                                </div>
+                                                <div class="col-3">
+                                                    <button class="btn btn-sm btn-outline-light w-100" onclick="activateTool('horizontal')" title="Horizontal Line">
+                                                        <i class="fas fa-arrows-alt-h"></i>
+                                                    </button>
+                                                </div>
+                                                <div class="col-3">
+                                                    <button class="btn btn-sm btn-outline-light w-100" onclick="activateTool('vertical')" title="Vertical Line">
+                                                        <i class="fas fa-arrows-alt-v"></i>
+                                                    </button>
+                                                </div>
+                                                <div class="col-3">
+                                                    <button class="btn btn-sm btn-outline-light w-100" onclick="activateTool('rectangle')" title="Rectangle">
+                                                        <i class="fas fa-square"></i>
+                                                    </button>
+                                                </div>
+                                                <div class="col-3">
+                                                    <button class="btn btn-sm btn-outline-light w-100" onclick="activateTool('circle')" title="Circle">
+                                                        <i class="fas fa-circle"></i>
+                                                    </button>
+                                                </div>
+                                                <div class="col-3">
+                                                    <button class="btn btn-sm btn-outline-light w-100" onclick="activateTool('fibonacci')" title="Fibonacci">
+                                                        <i class="fas fa-wave-square"></i>
+                                                    </button>
+                                                </div>
+                                                <div class="col-3">
+                                                    <button class="btn btn-sm btn-outline-danger w-100" onclick="clearDrawings()" title="Clear All">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right Panel - Trading Tools -->
+                            <div class="col-lg-4 col-xl-3 trading-panel">
+                                <!-- Instrument Selection -->
+                                <div class="market-data">
+                                    <h6 class="text-light mb-3">Markets</h6>
+                                    <div class="input-group mb-3">
+                                        <input type="text" class="form-control bg-dark text-light border-secondary" 
+                                               placeholder="Search instruments..." id="instrumentSearch">
+                                        <button class="btn btn-outline-secondary" type="button">
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                    </div>
+                                    <div class="instrument-list">
+                                        <!-- Instruments will be populated by JavaScript -->
+                                    </div>
+                                </div>
+
+                                <!-- Order Form -->
+                                <div class="order-form">
+                                    <h6 class="text-light mb-3">Quick Trade</h6>
+                                    <div class="mb-3">
+                                        <label class="form-label text-light">Instrument</label>
+                                        <select class="form-select bg-dark text-light border-secondary" id="tradeSymbol">
+                                            <option value="BTCUSD">BTC/USD</option>
+                                            <option value="ETHUSD">ETH/USD</option>
+                                            <option value="XRPUSD">XRP/USD</option>
+                                            <option value="LTCUSD">LTC/USD</option>
+                                            <option value="ADAUSD">ADA/USD</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="row g-2 mb-3">
+                                        <div class="col-6">
+                                            <label class="form-label text-light">Lots</label>
+                                            <input type="number" class="form-control bg-dark text-light border-secondary" 
+                                                   id="tradeVolume" value="0.01" min="0.01" step="0.01">
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label text-light">Leverage</label>
+                                            <select class="form-select bg-dark text-light border-secondary" id="tradeLeverage">
+                                                <option value="1">1:1</option>
+                                                <option value="5">1:5</option>
+                                                <option value="10">1:10</option>
+                                                <option value="25">1:25</option>
+                                                <option value="50">1:50</option>
+                                                <option value="100">1:100</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label text-light">Take Profit</label>
+                                        <input type="number" class="form-control bg-dark text-light border-secondary" 
+                                               id="takeProfit" placeholder="Auto calculate">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label text-light">Stop Loss</label>
+                                        <input type="number" class="form-control bg-dark text-light border-secondary" 
+                                               id="stopLoss" placeholder="Auto calculate">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label text-light">Risk Management</label>
+                                        <div class="risk-indicator">
+                                            <div class="risk-level" id="riskLevel" style="width: 30%;"></div>
+                                        </div>
+                                        <small class="text-muted" id="riskPercentage">30% of balance at risk</small>
+                                    </div>
+
+                                    <div class="row g-2">
+                                        <div class="col-6">
+                                            <button class="btn btn-buy w-100 py-3" onclick="placeOrder('buy')">
+                                                <i class="fas fa-arrow-up me-2"></i>BUY
+                                            </button>
+                                        </div>
+                                        <div class="col-6">
+                                            <button class="btn btn-sell w-100 py-3" onclick="placeOrder('sell')">
+                                                <i class="fas fa-arrow-down me-2"></i>SELL
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Positions -->
+                                <div class="market-data">
+                                    <h6 class="text-light mb-3">Open Positions</h6>
+                                    <div id="openPositions">
+                                        <!-- Positions will be populated by JavaScript -->
+                                    </div>
+                                </div>
+
+                                <!-- Order Book -->
+                                <div class="order-book">
+                                    <h6 class="text-light mb-3">Order Book</h6>
+                                    <div class="mb-2">
+                                        <div class="d-flex justify-content-between text-light">
+                                            <span>Price</span>
+                                            <span>Size</span>
+                                        </div>
+                                    </div>
+                                    <div id="orderBookBids">
+                                        <!-- Bids will be populated by JavaScript -->
+                                    </div>
+                                    <div class="text-center my-2">
+                                        <span class="text-warning fw-bold" id="currentPrice">$0.00</span>
+                                    </div>
+                                    <div id="orderBookAsks">
+                                        <!-- Asks will be populated by JavaScript -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Other Sections -->
+                <div id="otherSections" style="display: none;"></div>
+
+                <!-- Loading Spinner -->
+                <div class="loading-spinner" id="loadingSpinner">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Loading...</p>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Trading Alerts -->
+    <div class="trading-alert" id="tradingAlert" style="display: none;"></div>
+
+    <!-- Trading Settings Modal -->
+    <div class="modal fade" id="tradingSettingsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content bg-dark text-light">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title">Trading Settings</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Risk Management</h6>
+                            <div class="mb-3">
+                                <label class="form-label">Max Risk Per Trade (%)</label>
+                                <input type="range" class="form-range" id="maxRisk" min="1" max="100" value="5">
+                                <div class="d-flex justify-content-between">
+                                    <small>1%</small>
+                                    <small id="maxRiskValue">5%</small>
+                                    <small>100%</small>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Daily Loss Limit ($)</label>
+                                <input type="number" class="form-control bg-dark text-light border-secondary" 
+                                       id="dailyLossLimit" value="1000">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Trading Preferences</h6>
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="soundAlerts" checked>
+                                    <label class="form-check-label" for="soundAlerts">
+                                        Sound Alerts
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="confirmOrders" checked>
+                                    <label class="form-check-label" for="confirmOrders">
+                                        Confirm Orders
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="oneClickTrading">
+                                    <label class="form-check-label" for="oneClickTrading">
+                                        One-Click Trading
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveTradingSettings()">Save Settings</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- WebSocket Status -->
+    <div class="websocket-status" id="websocketStatus">
+        <i class="fas fa-wifi me-1"></i>
+        <span>Connecting...</span>
+    </div>
+
+    <!-- Your existing modals (Deposit, Investment, Profile, Referrals) -->
+    <!-- ... -->
+
+    <!-- Bootstrap & jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Trading Room Global Variables
+        let tradingChart = null;
+        let currentInstrument = 'BTCUSD';
+        let currentTimeframe = '1';
+        let openPositions = [];
+        let orderBook = { bids: [], asks: [] };
+        let tradingSettings = {
+            maxRisk: 5,
+            dailyLossLimit: 1000,
+            soundAlerts: true,
+            confirmOrders: true,
+            oneClickTrading: false
+        };
+
+        // Initialize dashboard when page loads
+        $(document).ready(function() {
+            checkAuthentication();
+            initializeWebSocket();
+            loadDashboardData();
+            setupEventListeners();
+            initializeTradingRoom();
+        });
+
+        // Initialize Trading Room
+        function initializeTradingRoom() {
+            loadInstruments();
+            initializeTradingChart();
+            updateOrderBook();
+            updateOpenPositions();
+            calculateRisk();
+        }
+
+        // Load available trading instruments
+        function loadInstruments() {
+            const instruments = [
+                { symbol: 'BTCUSD', name: 'Bitcoin/USD', price: 45000, change: 2.5 },
+                { symbol: 'ETHUSD', name: 'Ethereum/USD', price: 3000, change: -1.2 },
+                { symbol: 'XRPUSD', name: 'Ripple/USD', price: 0.75, change: 0.8 },
+                { symbol: 'LTCUSD', name: 'Litecoin/USD', price: 150, change: -0.5 },
+                { symbol: 'ADAUSD', name: 'Cardano/USD', price: 0.45, change: 3.2 },
+                { symbol: 'DOTUSD', name: 'Polkadot/USD', price: 25, change: 1.8 },
+                { symbol: 'LINKUSD', name: 'Chainlink/USD', price: 18, change: -2.1 },
+                { symbol: 'BCHUSD', name: 'Bitcoin Cash/USD', price: 400, change: 0.3 }
+            ];
+
+            const instrumentList = $('.instrument-list');
+            instrumentList.empty();
+
+            instruments.forEach(instrument => {
+                const changeClass = instrument.change >= 0 ? 'price-up' : 'price-down';
+                const changeIcon = instrument.change >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
+                
+                instrumentList.append(`
+                    <div class="instrument-item ${instrument.symbol === currentInstrument ? 'active' : ''}" 
+                         data-symbol="${instrument.symbol}" onclick="selectInstrument('${instrument.symbol}')">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="fw-bold">${instrument.symbol}</div>
+                                <small class="text-muted">${instrument.name}</small>
+                            </div>
+                            <div class="text-end">
+                                <div class="fw-bold">$${instrument.price.toLocaleString()}</div>
+                                <small class="${changeClass}">
+                                    <i class="fas ${changeIcon}"></i>
+                                    ${Math.abs(instrument.change)}%
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                `);
+            });
+        }
+
+        // Initialize TradingView Chart
+        function initializeTradingChart() {
+            if (typeof TradingView !== 'undefined') {
+                tradingChart = new TradingView.widget({
+                    width: "100%",
+                    height: 500,
+                    symbol: "BINANCE:BTCUSDT",
+                    interval: "1",
+                    timezone: "Etc/UTC",
+                    theme: "dark",
+                    style: "1",
+                    locale: "en",
+                    toolbar_bg: "#1e1e1e",
+                    enable_publishing: false,
+                    hide_top_toolbar: false,
+                    hide_legend: false,
+                    save_image: false,
+                    container_id: "tradingChart",
+                    studies: [
+                        "MACD@tv-basicstudies",
+                        "RSI@tv-basicstudies"
+                    ],
+                    drawings_access: { type: 'all', tools: [{ name: "Regression Trend" }] },
+                    disabled_features: [
+                        "use_localstorage_for_settings",
+                        "header_widget_dom_node",
+                        "header_compare",
+                        "header_screenshot",
+                        "header_saveload",
+                        "header_undo_redo"
+                    ],
+                    enabled_features: [
+                        "study_templates",
+                        "side_toolbar_in_fullscreen_mode",
+                        "keep_left_toolbar_visible_on_small_screens"
+                    ]
+                });
+
+                tradingChart.onChartReady(() => {
+                    console.log('TradingView chart ready');
+                });
+            }
+        }
+
+        // Select trading instrument
+        function selectInstrument(symbol) {
+            currentInstrument = symbol;
+            $('.instrument-item').removeClass('active');
+            $(`.instrument-item[data-symbol="${symbol}"]`).addClass('active');
+            $('#tradeSymbol').val(symbol);
+            
+            // Update chart symbol
+            if (tradingChart) {
+                // In a real implementation, you would change the chart symbol
+                console.log(`Switching to symbol: ${symbol}`);
+            }
+            
+            updateMarketData(symbol);
+        }
+
+        // Update market data for selected instrument
+        function updateMarketData(symbol) {
+            // Simulate market data updates
+            const price = Math.random() * 1000 + 45000;
+            const change = (Math.random() - 0.5) * 10;
+            
+            $('#currentPrice').text(`$${price.toFixed(2)}`);
+            
+            // Update order book
+            updateOrderBook();
+        }
+
+        // Update order book
+        function updateOrderBook() {
+            const bidsContainer = $('#orderBookBids');
+            const asksContainer = $('#orderBookAsks');
+            
+            bidsContainer.empty();
+            asksContainer.empty();
+            
+            // Generate sample order book data
+            for (let i = 0; i < 10; i++) {
+                const bidPrice = 45000 - (i * 50);
+                const bidSize = (Math.random() * 10).toFixed(2);
+                const askPrice = 45000 + (i * 50);
+                const askSize = (Math.random() * 10).toFixed(2);
+                
+                bidsContainer.append(`
+                    <div class="bid-row d-flex justify-content-between">
+                        <span class="text-success">$${bidPrice.toFixed(2)}</span>
+                        <span>${bidSize}</span>
+                    </div>
+                `);
+                
+                asksContainer.prepend(`
+                    <div class="ask-row d-flex justify-content-between">
+                        <span class="text-danger">$${askPrice.toFixed(2)}</span>
+                        <span>${askSize}</span>
+                    </div>
+                `);
+            }
+        }
+
+        // Update open positions
+        function updateOpenPositions() {
+            const positionsContainer = $('#openPositions');
+            positionsContainer.empty();
+            
+            if (openPositions.length === 0) {
+                positionsContainer.append(`
+                    <div class="text-center text-muted py-3">
+                        <i class="fas fa-inbox fa-2x mb-2"></i><br>
+                        No open positions
+                    </div>
+                `);
+                return;
+            }
+            
+            openPositions.forEach(position => {
+                const plClass = position.profit >= 0 ? 'text-success' : 'text-danger';
+                const plIcon = position.profit >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
+                
+                positionsContainer.append(`
+                    <div class="position-item ${position.type === 'sell' ? 'sell' : ''}">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <div class="fw-bold">${position.symbol}</div>
+                                <small class="text-muted">${position.type.toUpperCase()} • ${position.volume} lots</small>
+                            </div>
+                            <div class="text-end">
+                                <div class="${plClass} fw-bold">
+                                    <i class="fas ${plIcon}"></i>
+                                    $${Math.abs(position.profit).toFixed(2)}
+                                </div>
+                                <small class="text-muted">$${position.openPrice}</small>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <small>SL: $${position.stopLoss || 'None'}</small>
+                            <small>TP: $${position.takeProfit || 'None'}</small>
+                            <button class="btn btn-sm btn-outline-danger" onclick="closePosition('${position.id}')">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                `);
+            });
+        }
+
+        // Place new order
+        function placeOrder(type) {
+            if (!currentUser) {
+                showTradingAlert('Please login to trade', 'error');
+                return;
+            }
+
+            const symbol = $('#tradeSymbol').val();
+            const volume = parseFloat($('#tradeVolume').val());
+            const leverage = parseInt($('#tradeLeverage').val());
+            const takeProfit = $('#takeProfit').val();
+            const stopLoss = $('#stopLoss').val();
+
+            if (!volume || volume <= 0) {
+                showTradingAlert('Please enter a valid volume', 'error');
+                return;
+            }
+
+            // Calculate required margin
+            const currentPrice = parseFloat($('#currentPrice').text().replace('$', ''));
+            const marginRequired = (volume * currentPrice) / leverage;
+
+            if (marginRequired > currentUser.walletBalance) {
+                showTradingAlert('Insufficient balance for this trade', 'error');
+                return;
+            }
+
+            // Create position object
+            const position = {
+                id: generateId(),
+                symbol: symbol,
+                type: type,
+                volume: volume,
+                leverage: leverage,
+                openPrice: currentPrice,
+                takeProfit: takeProfit ? parseFloat(takeProfit) : null,
+                stopLoss: stopLoss ? parseFloat(stopLoss) : null,
+                openTime: new Date(),
+                profit: 0
+            };
+
+            openPositions.push(position);
+            updateOpenPositions();
+            
+            // Update user balance (in real app, this would be via API)
+            currentUser.walletBalance -= marginRequired;
+            updateBalanceDisplays();
+
+            showTradingAlert(`${type.toUpperCase()} order executed for ${symbol}`, 'success');
+            
+            // Play sound if enabled
+            if (tradingSettings.soundAlerts) {
+                playOrderSound();
+            }
+        }
+
+        // Close position
+        function closePosition(positionId) {
+            const positionIndex = openPositions.findIndex(p => p.id === positionId);
+            if (positionIndex !== -1) {
+                const position = openPositions[positionIndex];
+                
+                // Calculate final profit/loss (simulated)
+                const currentPrice = parseFloat($('#currentPrice').text().replace('$', ''));
+                const priceDiff = currentPrice - position.openPrice;
+                const profit = position.type === 'buy' ? priceDiff : -priceDiff;
+                const profitAmount = profit * position.volume * position.leverage;
+                
+                // Update user balance
+                currentUser.walletBalance += profitAmount;
+                updateBalanceDisplays();
+                
+                openPositions.splice(positionIndex, 1);
+                updateOpenPositions();
+                
+                showTradingAlert(
+                    `Position closed. P&L: $${profitAmount.toFixed(2)}`, 
+                    profitAmount >= 0 ? 'success' : 'error'
+                );
+            }
+        }
+
+        // Calculate risk management
+        function calculateRisk() {
+            const volume = parseFloat($('#tradeVolume').val()) || 0;
+            const leverage = parseInt($('#tradeLeverage').val()) || 1;
+            const currentPrice = parseFloat($('#currentPrice').text().replace('$', '')) || 45000;
+            
+            const tradeValue = volume * currentPrice * leverage;
+            const riskPercentage = (tradeValue / currentUser.walletBalance) * 100;
+            
+            $('#riskLevel').css('width', Math.min(riskPercentage, 100) + '%');
+            $('#riskPercentage').text(`${riskPercentage.toFixed(1)}% of balance at risk`);
+            
+            // Change color based on risk level
+            if (riskPercentage > 50) {
+                $('#riskLevel').css('background', '#ff4444');
+            } else if (riskPercentage > 25) {
+                $('#riskLevel').css('background', '#ffaa00');
+            } else {
+                $('#riskLevel').css('background', '#00c853');
+            }
+        }
+
+        // Add technical indicator
+        function addIndicator(indicator) {
+            if (tradingChart) {
+                // In real implementation, this would add the indicator to the TradingView chart
+                console.log(`Adding indicator: ${indicator}`);
+                showTradingAlert(`${indicator} indicator added`, 'info');
+            }
+        }
+
+        // Activate drawing tool
+        function activateTool(tool) {
+            if (tradingChart) {
+                // In real implementation, this would activate the drawing tool
+                console.log(`Activating tool: ${tool}`);
+                showTradingAlert(`${tool} tool activated`, 'info');
+            }
+        }
+
+        // Clear all drawings
+        function clearDrawings() {
+            if (tradingChart) {
+                // In real implementation, this would clear all drawings
+                console.log('Clearing all drawings');
+                showTradingAlert('All drawings cleared', 'info');
+            }
+        }
+
+        // Show trading settings modal
+        function showTradingSettings() {
+            $('#maxRisk').val(tradingSettings.maxRisk);
+            $('#maxRiskValue').text(tradingSettings.maxRisk + '%');
+            $('#dailyLossLimit').val(tradingSettings.dailyLossLimit);
+            $('#soundAlerts').prop('checked', tradingSettings.soundAlerts);
+            $('#confirmOrders').prop('checked', tradingSettings.confirmOrders);
+            $('#oneClickTrading').prop('checked', tradingSettings.oneClickTrading);
+            
+            $('#tradingSettingsModal').modal('show');
+        }
+
+        // Save trading settings
+        function saveTradingSettings() {
+            tradingSettings.maxRisk = parseInt($('#maxRisk').val());
+            tradingSettings.dailyLossLimit = parseFloat($('#dailyLossLimit').val());
+            tradingSettings.soundAlerts = $('#soundAlerts').is(':checked');
+            tradingSettings.confirmOrders = $('#confirmOrders').is(':checked');
+            tradingSettings.oneClickTrading = $('#oneClickTrading').is(':checked');
+            
+            $('#tradingSettingsModal').modal('hide');
+            showTradingAlert('Trading settings saved', 'success');
+        }
+
+        // Show trading alert
+        function showTradingAlert(message, type) {
+            const alert = $('#tradingAlert');
+            const bgClass = type === 'success' ? 'bg-success' : 
+                           type === 'error' ? 'bg-danger' : 
+                           type === 'warning' ? 'bg-warning' : 'bg-info';
+            
+            alert.removeClass('bg-success bg-danger bg-warning bg-info')
+                 .addClass(bgClass)
+                 .html(`
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>${message}</span>
+                        <button type="button" class="btn-close btn-close-white" onclick="$(this).closest('.trading-alert').hide()"></button>
+                    </div>
+                 `)
+                 .slideDown();
+            
+            setTimeout(() => {
+                alert.slideUp();
+            }, 5000);
+        }
+
+        // Play order sound
+        function playOrderSound() {
+            // In real implementation, play a sound
+            console.log('Playing order sound');
+        }
+
+        // Generate unique ID
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        }
+
+        // Update balance displays for trading
+        function updateBalanceDisplays() {
+            $('#tradingBalance').text(`$${currentUser.walletBalance.toFixed(2)}`);
+            
+            // Calculate free margin (total balance - used margin)
+            const usedMargin = openPositions.reduce((total, position) => {
+                return total + (position.volume * position.openPrice / position.leverage);
+            }, 0);
+            
+            const freeMargin = currentUser.walletBalance - usedMargin;
+            $('#freeMargin').text(`$${freeMargin.toFixed(2)}`);
+        }
+
+        // Enhanced showSection function to handle trading room
+        function showSection(section) {
+            // Hide all sections first
+            $('#dashboardSection').hide();
+            $('#tradingSection').hide();
+            $('#otherSections').hide();
+            
+            // Show loading
+            showLoading();
+            
+            // Load section content
+            setTimeout(() => {
+                hideLoading();
+                
+                if (section === 'dashboard') {
+                    $('#dashboardSection').show();
+                } else if (section === 'trading') {
+                    $('#tradingSection').show();
+                    // Initialize trading room if not already done
+                    if (!tradingChart) {
+                        initializeTradingRoom();
+                    }
+                } else {
+                    $('#otherSections').show();
+                    // Load other section content
+                    $('#otherSections').html(`
+                        <div class="alert alert-info">
+                            <h4>${section.charAt(0).toUpperCase() + section.slice(1)} Section</h4>
+                            <p>This section is under development.</p>
+                            <button class="btn btn-primary" onclick="showSection('dashboard')">
+                                Back to Dashboard
+                            </button>
+                        </div>
+                    `);
+                }
+                
+                // Update sidebar active state
+                $('.sidebar .nav-link').removeClass('active');
+                $(`.sidebar .nav-link[data-section="${section}"]`).addClass('active');
+            }, 1000);
+        }
+
+        // Event listeners for trading room
+        $(document).ready(function() {
+            // Timeframe selection
+            $('.timeframe-btn').on('click', function() {
+                $('.timeframe-btn').removeClass('active');
+                $(this).addClass('active');
+                currentTimeframe = $(this).data('timeframe');
+                
+                if (tradingChart) {
+                    // Change chart timeframe
+                    console.log(`Changing timeframe to: ${currentTimeframe}`);
+                }
+            });
+
+            // Risk calculation on input change
+            $('#tradeVolume, #tradeLeverage').on('input', calculateRisk);
+
+            // Max risk slider
+            $('#maxRisk').on('input', function() {
+                $('#maxRiskValue').text($(this).val() + '%');
+            });
+
+            // Auto-calculate Take Profit and Stop Loss
+            $('#tradeVolume').on('change', function() {
+                const volume = parseFloat($(this).val());
+                const currentPrice = parseFloat($('#currentPrice').text().replace('$', '')) || 45000;
+                
+                if (volume && currentPrice) {
+                    const takeProfit = (currentPrice * 1.02).toFixed(2);
+                    const stopLoss = (currentPrice * 0.98).toFixed(2);
+                    
+                    $('#takeProfit').val(takeProfit);
+                    $('#stopLoss').val(stopLoss);
+                }
+            });
+        });
+
+        // Your existing functions (loadUserData, updateUIWithUserData, etc.)
+        // ... (keep all your existing functions from the previous implementation)
+
+        // Make functions global
+        window.showSection = showSection;
+        window.placeOrder = placeOrder;
+        window.closePosition = closePosition;
+        window.addIndicator = addIndicator;
+        window.activateTool = activateTool;
+        window.clearDrawings = clearDrawings;
+        window.showTradingSettings = showTradingSettings;
+        window.saveTradingSettings = saveTradingSettings;
+        window.selectInstrument = selectInstrument;
+
+    </script>
+</body>
+</html>
