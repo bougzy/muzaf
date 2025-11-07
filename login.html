@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - WCTRADE</title>
+    <title>WCTRADE - Authentication</title>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* Your existing CSS styles remain the same */
         :root {
             --primary-color: #2c3e50;
             --secondary-color: #3498db;
@@ -34,28 +33,35 @@
             padding: 20px;
         }
 
-        .login-container {
+        .auth-container {
             background: rgba(255, 255, 255, 0.95);
             border-radius: 20px;
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
             overflow: hidden;
             width: 100%;
-            max-width: 400px;
+            max-width: 1000px;
+            min-height: 600px;
         }
 
-        .login-header {
+        .auth-left {
             background: linear-gradient(135deg, var(--primary-color), #1a2530);
             color: white;
-            padding: 30px;
-            text-align: center;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
-        .login-body {
-            padding: 40px 30px 30px;
+        .auth-right {
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
         .logo {
-            margin-bottom: 20px;
+            text-align: center;
+            margin-bottom: 30px;
         }
 
         .logo i {
@@ -66,13 +72,47 @@
 
         .logo h1 {
             font-weight: 700;
-            font-size: 2rem;
+            font-size: 2.5rem;
             margin-bottom: 5px;
         }
 
         .logo p {
             opacity: 0.8;
+            font-size: 1.1rem;
+        }
+
+        .features-list {
+            list-style: none;
+            padding: 0;
+            margin: 30px 0;
+        }
+
+        .features-list li {
+            padding: 10px 0;
+            display: flex;
+            align-items: center;
             font-size: 1rem;
+        }
+
+        .features-list li i {
+            color: var(--success-color);
+            margin-right: 15px;
+            font-size: 1.2rem;
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .form-header h2 {
+            color: var(--primary-color);
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .form-header p {
+            color: #6c757d;
         }
 
         .form-group {
@@ -108,7 +148,51 @@
             border-left: none;
         }
 
-        .btn-login {
+        .password-strength {
+            height: 4px;
+            background: #e9ecef;
+            border-radius: 2px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+
+        .password-strength-bar {
+            height: 100%;
+            width: 0%;
+            transition: all 0.3s ease;
+            border-radius: 2px;
+        }
+
+        .strength-weak { background-color: var(--danger-color); width: 33%; }
+        .strength-medium { background-color: var(--warning-color); width: 66%; }
+        .strength-strong { background-color: var(--success-color); width: 100%; }
+
+        .terms-check {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .terms-check input {
+            margin-top: 3px;
+            margin-right: 10px;
+        }
+
+        .terms-check label {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        .terms-check a {
+            color: var(--secondary-color);
+            text-decoration: none;
+        }
+
+        .terms-check a:hover {
+            text-decoration: underline;
+        }
+
+        .btn-auth {
             background: linear-gradient(45deg, var(--secondary-color), #2980b9);
             border: none;
             border-radius: 10px;
@@ -121,15 +205,84 @@
             margin-bottom: 20px;
         }
 
-        .btn-login:hover {
+        .btn-auth:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
         }
 
-        .btn-login:disabled {
+        .btn-auth:disabled {
             background: #6c757d;
             transform: none;
             box-shadow: none;
+        }
+
+        .auth-link {
+            text-align: center;
+            margin-top: 20px;
+            color: #6c757d;
+        }
+
+        .auth-link a {
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .auth-link a:hover {
+            text-decoration: underline;
+        }
+
+        .alert {
+            border-radius: 10px;
+            border: none;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+        }
+
+        .referral-badge {
+            background: linear-gradient(45deg, var(--success-color), #219a52);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .step {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 10px;
+            font-weight: 600;
+            color: #6c757d;
+            transition: all 0.3s ease;
+        }
+
+        .step.active {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .step.completed {
+            background: var(--success-color);
+            color: white;
         }
 
         .login-options {
@@ -153,35 +306,6 @@
             text-decoration: underline;
         }
 
-        .register-link {
-            text-align: center;
-            margin-top: 20px;
-            color: #6c757d;
-        }
-
-        .register-link a {
-            color: var(--secondary-color);
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .register-link a:hover {
-            text-decoration: underline;
-        }
-
-        .alert {
-            border-radius: 10px;
-            border: none;
-            padding: 15px 20px;
-            margin-bottom: 20px;
-        }
-
-        .loading-spinner {
-            display: none;
-            text-align: center;
-            padding: 20px;
-        }
-
         .security-features {
             background: #f8f9fa;
             border-radius: 10px;
@@ -198,25 +322,14 @@
         .location-info {
             background: #f8f9fa;
             border-radius: 10px;
-            padding: 10px;
-            margin-top: 15px;
-            font-size: 0.8rem;
-            text-align: center;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 0.9rem;
         }
 
         .location-info i {
             color: var(--secondary-color);
-            margin-right: 5px;
-        }
-
-        @media (max-width: 480px) {
-            .login-container {
-                max-width: 100%;
-            }
-            
-            .login-body {
-                padding: 30px 20px 20px;
-            }
+            margin-right: 8px;
         }
 
         .password-toggle {
@@ -230,90 +343,334 @@
         .password-toggle:hover {
             color: var(--secondary-color);
         }
+
+        @media (max-width: 768px) {
+            .auth-left {
+                display: none;
+            }
+            
+            .auth-container {
+                max-width: 500px;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-header">
-            <div class="logo">
-                <i class="fas fa-globe-americas"></i>
-                <h1>WCTRADE</h1>
-                <p>Professional Trading Platform</p>
+    <!-- Login Form -->
+    <div class="auth-container" id="loginContainer">
+        <div class="row g-0">
+            <!-- Left Side - Branding & Features -->
+            <div class="col-lg-6 auth-left">
+                <div class="logo">
+                    <i class="fas fa-globe-americas"></i>
+                    <h1>WCTRADE</h1>
+                    <p>Professional Trading Platform</p>
+                </div>
+                
+                <ul class="features-list">
+                    <li>
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Bank-level Security & Encryption</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-chart-line"></i>
+                        <span>Advanced Trading Tools</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span>Multiple Investment Plans</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-mobile-alt"></i>
+                        <span>Mobile-Friendly Platform</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-headset"></i>
+                        <span>24/7 Customer Support</span>
+                    </li>
+                </ul>
+
+                <div class="location-info">
+                    <p><i class="fas fa-map-marker-alt"></i> <span id="locationText">Secure connection established</span></p>
+                    <p><i class="fas fa-clock"></i> <span id="timezoneText">Loading timezone...</span></p>
+                </div>
+            </div>
+
+            <!-- Right Side - Login Form -->
+            <div class="col-lg-6 auth-right">
+                <div class="form-header">
+                    <h2>Welcome Back</h2>
+                    <p>Sign in to your account to continue</p>
+                </div>
+
+                <!-- Alert Container -->
+                <div id="alertContainer"></div>
+
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label class="form-label" for="loginEmail">Email Address</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-envelope"></i>
+                            </span>
+                            <input type="email" class="form-control" id="loginEmail" name="email" placeholder="Enter your email" required>
+                        </div>
+                        <div class="invalid-feedback">Please enter a valid email address.</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="loginPassword">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-lock"></i>
+                            </span>
+                            <input type="password" class="form-control" id="loginPassword" name="password" placeholder="Enter your password" required>
+                            <button type="button" class="input-group-text password-toggle" id="passwordToggle">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="invalid-feedback">Please enter your password.</div>
+                    </div>
+
+                    <div class="login-options">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="rememberMe" name="rememberMe">
+                            <label class="form-check-label" for="rememberMe">Remember me</label>
+                        </div>
+                        <a href="#" class="forgot-password" data-bs-toggle="modal" data-bs-target="#forgotPasswordModal">
+                            Forgot Password?
+                        </a>
+                    </div>
+
+                    <button type="submit" class="btn-auth" id="loginButton">
+                        <i class="fas fa-sign-in-alt me-2"></i> Sign In
+                    </button>
+                </form>
+
+                <div class="auth-link">
+                    Don't have an account? <a href="#" id="showRegister">Create Account</a>
+                </div>
+
+                <!-- Security Features -->
+                <div class="security-features">
+                    <p class="mb-2"><i class="fas fa-shield-alt"></i> Secure SSL Encryption</p>
+                    <p class="mb-0"><i class="fas fa-user-shield"></i> Two-Factor Authentication Ready</p>
+                </div>
+
+                <!-- Loading Spinner -->
+                <div class="loading-spinner" id="loadingSpinner">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Signing you in...</p>
+                </div>
             </div>
         </div>
+    </div>
 
-        <div class="login-body">
-            <h2 class="text-center mb-4" style="color: var(--primary-color);">Welcome Back</h2>
-            <p class="text-center text-muted mb-4">Sign in to your account to continue</p>
+    <!-- Register Form (Initially Hidden) -->
+    <div class="auth-container" id="registerContainer" style="display: none;">
+        <div class="row g-0">
+            <!-- Left Side - Branding & Features -->
+            <div class="col-lg-6 auth-left">
+                <div class="logo">
+                    <i class="fas fa-globe-americas"></i>
+                    <h1>WCTRADE</h1>
+                    <p>Professional Trading Platform</p>
+                </div>
+                
+                <ul class="features-list">
+                    <li>
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Bank-level Security & Encryption</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-chart-line"></i>
+                        <span>Advanced Trading Tools</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span>Multiple Investment Plans</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-mobile-alt"></i>
+                        <span>Mobile-Friendly Platform</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-headset"></i>
+                        <span>24/7 Customer Support</span>
+                    </li>
+                </ul>
 
-            <!-- Alert Container -->
-            <div id="alertContainer"></div>
+                <div class="location-info">
+                    <p><i class="fas fa-map-marker-alt"></i> <span id="registerLocationText">Detecting your location...</span></p>
+                    <p><i class="fas fa-clock"></i> <span id="registerTimezoneText">Loading timezone...</span></p>
+                </div>
+            </div>
 
-            <form id="loginForm">
-                <div class="form-group">
-                    <label class="form-label" for="email">Email Address</label>
-                    <div class="input-group">
-                        <span class="input-group-text">
-                            <i class="fas fa-envelope"></i>
-                        </span>
-                        <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" required>
-                    </div>
-                    <div class="invalid-feedback">Please enter a valid email address.</div>
+            <!-- Right Side - Registration Form -->
+            <div class="col-lg-6 auth-right">
+                <div class="form-header">
+                    <h2>Create Your Account</h2>
+                    <p>Join thousands of successful traders</p>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label" for="password">Password</label>
-                    <div class="input-group">
-                        <span class="input-group-text">
-                            <i class="fas fa-lock"></i>
-                        </span>
-                        <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
-                        <button type="button" class="input-group-text password-toggle" id="passwordToggle">
-                            <i class="fas fa-eye"></i>
+                <!-- Step Indicator -->
+                <div class="step-indicator">
+                    <div class="step active">1</div>
+                    <div class="step">2</div>
+                    <div class="step">3</div>
+                </div>
+
+                <!-- Alert Container -->
+                <div id="registerAlertContainer"></div>
+
+                <form id="registerForm">
+                    <!-- Step 1: Personal Information -->
+                    <div class="form-step" id="step1">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label" for="name">Full Name *</label>
+                                    <input type="text" class="form-control" id="name" name="name" required>
+                                    <div class="invalid-feedback">Please enter your full name.</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label" for="username">Username *</label>
+                                    <input type="text" class="form-control" id="username" name="username" required>
+                                    <div class="invalid-feedback">Please choose a username.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="email">Email Address *</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                            <div class="invalid-feedback">Please enter a valid email address.</div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label" for="password">Password *</label>
+                                    <input type="password" class="form-control" id="password" name="password" required minlength="6">
+                                    <div class="password-strength">
+                                        <div class="password-strength-bar" id="passwordStrength"></div>
+                                    </div>
+                                    <small class="form-text text-muted">Minimum 6 characters</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label" for="confirmPassword">Confirm Password *</label>
+                                    <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+                                    <div class="invalid-feedback">Passwords do not match.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="button" class="btn btn-outline-primary w-100" onclick="nextStep()">
+                            Continue <i class="fas fa-arrow-right ms-2"></i>
                         </button>
                     </div>
-                    <div class="invalid-feedback">Please enter your password.</div>
-                </div>
 
-                <div class="login-options">
-                    <div class="form-check">
-                        <input type="checkbox" class="form-check-input" id="rememberMe" name="rememberMe">
-                        <label class="form-check-label" for="rememberMe">Remember me</label>
+                    <!-- Step 2: Security & Wallet -->
+                    <div class="form-step" id="step2" style="display: none;">
+                        <div class="form-group">
+                            <label class="form-label" for="secretQuestion">Security Question *</label>
+                            <select class="form-control" id="secretQuestion" name="secretQuestion" required>
+                                <option value="">Select a security question</option>
+                                <option value="What was your first pet's name?">What was your first pet's name?</option>
+                                <option value="What is your mother's maiden name?">What is your mother's maiden name?</option>
+                                <option value="What city were you born in?">What city were you born in?</option>
+                                <option value="What was your first car?">What was your first car?</option>
+                                <option value="What is your favorite book?">What is your favorite book?</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="secretAnswer">Security Answer *</label>
+                            <input type="text" class="form-control" id="secretAnswer" name="secretAnswer" required>
+                            <div class="invalid-feedback">Please provide an answer to your security question.</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="bitcoinAccount">Bitcoin Wallet Address</label>
+                            <input type="text" class="form-control" id="bitcoinAccount" name="bitcoinAccount" placeholder="Optional">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="tetherTRC20Account">USDT (TRC20) Wallet Address</label>
+                            <input type="text" class="form-control" id="tetherTRC20Account" name="tetherTRC20Account" placeholder="Optional">
+                        </div>
+
+                        <div class="row">
+                            <div class="col-6">
+                                <button type="button" class="btn btn-outline-secondary w-100" onclick="prevStep()">
+                                    <i class="fas fa-arrow-left me-2"></i> Back
+                                </button>
+                            </div>
+                            <div class="col-6">
+                                <button type="button" class="btn btn-outline-primary w-100" onclick="nextStep()">
+                                    Continue <i class="fas fa-arrow-right ms-2"></i>
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                    <a href="#" class="forgot-password" data-bs-toggle="modal" data-bs-target="#forgotPasswordModal">
-                        Forgot Password?
-                    </a>
+
+                    <!-- Step 3: Referral & Terms -->
+                    <div class="form-step" id="step3" style="display: none;">
+                        <div class="form-group">
+                            <label class="form-label" for="referralCode">
+                                Referral Code 
+                                <span class="referral-badge">Optional</span>
+                            </label>
+                            <input type="text" class="form-control" id="referralCode" name="referralCode" placeholder="Enter referral code if you have one">
+                        </div>
+
+                        <div class="terms-check">
+                            <input type="checkbox" id="agreedToTerms" name="agreedToTerms" required>
+                            <label for="agreedToTerms">
+                                I agree to the <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">Terms and Conditions</a> 
+                                and <a href="#" data-bs-toggle="modal" data-bs-target="#privacyModal">Privacy Policy</a>
+                            </label>
+                        </div>
+
+                        <div class="terms-check">
+                            <input type="checkbox" id="marketingEmails" name="marketingEmails">
+                            <label for="marketingEmails">
+                                I would like to receive marketing emails and updates
+                            </label>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-6">
+                                <button type="button" class="btn btn-outline-secondary w-100" onclick="prevStep()">
+                                    <i class="fas fa-arrow-left me-2"></i> Back
+                                </button>
+                            </div>
+                            <div class="col-6">
+                                <button type="submit" class="btn-auth" id="registerButton">
+                                    <i class="fas fa-user-plus me-2"></i> Create Account
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="auth-link">
+                    Already have an account? <a href="#" id="showLogin">Sign In</a>
                 </div>
 
-                <button type="submit" class="btn-login" id="loginButton">
-                    <i class="fas fa-sign-in-alt me-2"></i> Sign In
-                </button>
-            </form>
-
-            <div class="register-link">
-                Don't have an account? <a href="register.html">Create Account</a>
-            </div>
-
-            <!-- Security Features -->
-            <div class="security-features">
-                <p class="mb-2"><i class="fas fa-shield-alt"></i> Secure SSL Encryption</p>
-                <p class="mb-0"><i class="fas fa-user-shield"></i> Two-Factor Authentication Ready</p>
-            </div>
-
-            <!-- Location Info -->
-            <div class="location-info">
-                <p class="mb-0">
-                    <i class="fas fa-map-marker-alt"></i>
-                    <span id="locationText">Detecting your location...</span>
-                </p>
-            </div>
-
-            <!-- Loading Spinner -->
-            <div class="loading-spinner" id="loadingSpinner">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Loading...</span>
+                <!-- Loading Spinner -->
+                <div class="loading-spinner" id="registerLoadingSpinner">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Creating your account...</p>
                 </div>
-                <p class="mt-2">Signing you in...</p>
             </div>
         </div>
     </div>
@@ -343,6 +700,44 @@
         </div>
     </div>
 
+    <!-- Terms Modal -->
+    <div class="modal fade" id="termsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Terms and Conditions</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Please read these terms and conditions carefully before using our service.</p>
+                    <!-- Add your terms and conditions content here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Privacy Modal -->
+    <div class="modal fade" id="privacyModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Privacy Policy</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Your privacy is important to us. Please read our privacy policy carefully.</p>
+                    <!-- Add your privacy policy content here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Bootstrap & jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -350,38 +745,82 @@
     <script>
         // Configuration
         const API_BASE_URL = 'https://muza-xi3w.onrender.com/api';
+        let currentStep = 1;
+        let userLocation = {};
+
+        // User database simulation (in a real app, this would be on the server)
+        const userDatabase = JSON.parse(localStorage.getItem('userDatabase') || '{}');
 
         // Initialize the page
         $(document).ready(function() {
             detectLocation();
             setupEventListeners();
-            checkRememberedUser();
-            checkSavedCredentials();
+            checkUrlParams();
+            checkExistingSession();
         });
+
+        // Check for referral code in URL
+        function checkUrlParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const refCode = urlParams.get('ref');
+            if (refCode) {
+                $('#referralCode').val(refCode);
+            }
+        }
 
         // Detect user location
         function detectLocation() {
-            // Simple IP-based location detection
             $('#locationText').text('Secure connection established');
+            $('#registerLocationText').text('Location detected via IP');
+            $('#timezoneText').text(Intl.DateTimeFormat().resolvedOptions().timeZone);
+            $('#registerTimezoneText').text(Intl.DateTimeFormat().resolvedOptions().timeZone);
         }
 
         // Setup event listeners
         function setupEventListeners() {
+            // Form toggling
+            $('#showRegister').on('click', function(e) {
+                e.preventDefault();
+                $('#loginContainer').hide();
+                $('#registerContainer').show();
+            });
+            
+            $('#showLogin').on('click', function(e) {
+                e.preventDefault();
+                $('#registerContainer').hide();
+                $('#loginContainer').show();
+            });
+            
             // Password toggle
             $('#passwordToggle').on('click', togglePasswordVisibility);
             
-            // Form submission
+            // Login form submission
             $('#loginForm').on('submit', handleLogin);
             
-            // Input validation
-            $('input').on('blur', function() {
+            // Registration form submission
+            $('#registerForm').on('submit', handleRegistration);
+            
+            // Password strength indicator
+            $('#password').on('input', checkPasswordStrength);
+            
+            // Password confirmation
+            $('#confirmPassword').on('input', checkPasswordMatch);
+            
+            // Real-time validation
+            $('input, select').on('blur', function() {
                 validateField(this);
             });
             
             // Enter key submission
             $(document).on('keypress', function(e) {
                 if (e.which === 13) { // Enter key
-                    $('#loginForm').submit();
+                    if ($('#loginContainer').is(':visible')) {
+                        $('#loginForm').submit();
+                    } else if (currentStep < 3) {
+                        nextStep();
+                    } else if (currentStep === 3) {
+                        $('#registerForm').submit();
+                    }
                 }
             });
         }
@@ -390,29 +829,14 @@
         function checkRememberedUser() {
             const rememberedEmail = localStorage.getItem('rememberedEmail');
             if (rememberedEmail) {
-                $('#email').val(rememberedEmail);
+                $('#loginEmail').val(rememberedEmail);
                 $('#rememberMe').prop('checked', true);
-            }
-        }
-
-        // Check for saved credentials and auto-fill
-        function checkSavedCredentials() {
-            const savedEmail = localStorage.getItem('userEmail');
-            const savedPassword = localStorage.getItem('userPassword');
-            
-            if (savedEmail && savedPassword) {
-                $('#email').val(savedEmail);
-                $('#password').val(savedPassword);
-                $('#rememberMe').prop('checked', true);
-                
-                // Show a notification that credentials were auto-filled
-                showAlert('Your login credentials have been auto-filled from your previous registration.', 'info');
             }
         }
 
         // Toggle password visibility
         function togglePasswordVisibility() {
-            const passwordInput = $('#password');
+            const passwordInput = $('#loginPassword');
             const toggleIcon = $('#passwordToggle i');
             
             if (passwordInput.attr('type') === 'password') {
@@ -421,6 +845,45 @@
             } else {
                 passwordInput.attr('type', 'password');
                 toggleIcon.removeClass('fa-eye-slash').addClass('fa-eye');
+            }
+        }
+
+        // Password strength checker
+        function checkPasswordStrength() {
+            const password = $('#password').val();
+            const strengthBar = $('#passwordStrength');
+            let strength = 0;
+            
+            if (password.length >= 6) strength += 1;
+            if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength += 1;
+            if (password.match(/\d/)) strength += 1;
+            if (password.match(/[^a-zA-Z\d]/)) strength += 1;
+            
+            strengthBar.removeClass('strength-weak strength-medium strength-strong');
+            
+            if (password.length === 0) {
+                strengthBar.css('width', '0%');
+            } else if (strength <= 1) {
+                strengthBar.addClass('strength-weak');
+            } else if (strength <= 2) {
+                strengthBar.addClass('strength-medium');
+            } else {
+                strengthBar.addClass('strength-strong');
+            }
+        }
+
+        // Password match checker
+        function checkPasswordMatch() {
+            const password = $('#password').val();
+            const confirmPassword = $('#confirmPassword').val();
+            const confirmField = $('#confirmPassword');
+            
+            if (confirmPassword && password !== confirmPassword) {
+                confirmField.addClass('is-invalid');
+                confirmField.removeClass('is-valid');
+            } else if (confirmPassword) {
+                confirmField.removeClass('is-invalid');
+                confirmField.addClass('is-valid');
             }
         }
 
@@ -450,6 +913,60 @@
             return true;
         }
 
+        // Step navigation
+        function nextStep() {
+            if (!validateStep(currentStep)) {
+                showAlert('Please fill in all required fields correctly.', 'warning', 'register');
+                return;
+            }
+            
+            $('#step' + currentStep).hide();
+            $('.step').eq(currentStep - 1).removeClass('active').addClass('completed');
+            
+            currentStep++;
+            
+            $('#step' + currentStep).show();
+            $('.step').eq(currentStep - 1).addClass('active');
+        }
+
+        function prevStep() {
+            $('#step' + currentStep).hide();
+            $('.step').eq(currentStep - 1).removeClass('active');
+            
+            currentStep--;
+            
+            $('#step' + currentStep).show();
+            $('.step').eq(currentStep - 1).addClass('active');
+        }
+
+        // Step validation
+        function validateStep(step) {
+            let isValid = true;
+            
+            if (step === 1) {
+                const fields = ['#name', '#username', '#email', '#password', '#confirmPassword'];
+                fields.forEach(field => {
+                    if (!validateField($(field)[0])) {
+                        isValid = false;
+                    }
+                });
+                
+                // Check password match
+                if ($('#password').val() !== $('#confirmPassword').val()) {
+                    isValid = false;
+                }
+            } else if (step === 2) {
+                const fields = ['#secretQuestion', '#secretAnswer'];
+                fields.forEach(field => {
+                    if (!validateField($(field)[0])) {
+                        isValid = false;
+                    }
+                });
+            }
+            
+            return isValid;
+        }
+
         // Handle login
         async function handleLogin(event) {
             event.preventDefault();
@@ -463,120 +980,161 @@
             });
             
             if (!isValid) {
-                showAlert('Please fill in all required fields correctly.', 'warning');
+                showAlert('Please fill in all required fields correctly.', 'warning', 'login');
                 return;
             }
             
-            showLoading(true);
+            showLoading(true, 'login');
             
             try {
                 const loginData = {
-                    email: $('#email').val().trim().toLowerCase(),
-                    password: $('#password').val()
+                    email: $('#loginEmail').val().trim().toLowerCase(),
+                    password: $('#loginPassword').val()
                 };
                 
-                const response = await fetch(`${API_BASE_URL}/login`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(loginData)
-                });
+                // Check if user exists in our simulated database
+                const user = userDatabase[loginData.email];
                 
-                // If the API is not available, simulate a successful login
-                let result;
-                if (!response.ok) {
-                    // Check if credentials match saved registration
-                    const savedEmail = localStorage.getItem('userEmail');
-                    const savedPassword = localStorage.getItem('userPassword');
+                if (user && user.password === loginData.password) {
+                    // Login successful
+                    showAlert('Login successful! Redirecting...', 'success', 'login');
                     
-                    if (loginData.email === savedEmail && loginData.password === savedPassword) {
-                        // Simulate successful login for demo
-                        const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-                        result = {
-                            success: true,
-                            data: {
-                                token: 'demo-token-' + Date.now(),
-                                user: userData
-                            }
-                        };
+                    // Store user data and token
+                    const token = 'demo-token-' + Date.now();
+                    
+                    localStorage.setItem('token', token);
+                    localStorage.setItem('userData', JSON.stringify(user));
+                    localStorage.setItem('lastLogin', new Date().toISOString());
+                    
+                    // Remember email if requested
+                    if ($('#rememberMe').is(':checked')) {
+                        localStorage.setItem('rememberedEmail', loginData.email);
                     } else {
-                        throw new Error('Invalid email or password');
+                        localStorage.removeItem('rememberedEmail');
                     }
+                    
+                    // Verify storage and redirect
+                    setTimeout(() => {
+                        if (localStorage.getItem('token')) {
+                            window.location.href = 'dashboard.html?login=true&t=' + Date.now();
+                        } else {
+                            throw new Error('Login data not stored properly');
+                        }
+                    }, 800);
+                    
                 } else {
-                    result = await response.json();
+                    throw new Error('Invalid email or password');
                 }
-                
-                // Improved login success handler
-if (result.success) {
-    showAlert('Login successful! Redirecting...', 'success');
-    
-    // Store user data and token
-    const token = result.data.token || 'demo-token-' + Date.now();
-    const userData = result.data.user || JSON.parse(localStorage.getItem('userData') || '{}');
-    
-    localStorage.setItem('token', token);
-    localStorage.setItem('userData', JSON.stringify(userData));
-    localStorage.setItem('lastLogin', new Date().toISOString());
-    
-    // Remember email if requested
-    if ($('#rememberMe').is(':checked')) {
-        localStorage.setItem('rememberedEmail', loginData.email);
-    } else {
-        localStorage.removeItem('rememberedEmail');
-    }
-    
-    // Verify storage and redirect
-    setTimeout(() => {
-        if (localStorage.getItem('token')) {
-            window.location.href = 'dashboard.html?login=true&t=' + Date.now();
-        } else {
-            throw new Error('Login data not stored properly');
-        }
-    }, 800);
-    
-} else {
-    throw new Error(result.message);
-}
                 
             } catch (error) {
                 console.error('Login error:', error);
-                showAlert(error.message || 'Login failed. Please check your credentials and try again.', 'danger');
+                showAlert(error.message || 'Login failed. Please check your credentials and try again.', 'danger', 'login');
             } finally {
-                showLoading(false);
+                showLoading(false, 'login');
+            }
+        }
+
+        // Handle registration
+        async function handleRegistration(event) {
+            event.preventDefault();
+            
+            if (!validateStep(3)) {
+                showAlert('Please agree to the terms and conditions.', 'warning', 'register');
+                return;
+            }
+            
+            if (!$('#agreedToTerms').is(':checked')) {
+                showAlert('You must agree to the terms and conditions.', 'warning', 'register');
+                return;
+            }
+            
+            showLoading(true, 'register');
+            
+            try {
+                const formData = {
+                    name: $('#name').val().trim(),
+                    username: $('#username').val().trim().toLowerCase(),
+                    email: $('#email').val().trim().toLowerCase(),
+                    password: $('#password').val(),
+                    confirmPassword: $('#confirmPassword').val(),
+                    secretQuestion: $('#secretQuestion').val(),
+                    secretAnswer: $('#secretAnswer').val(),
+                    bitcoinAccount: $('#bitcoinAccount').val().trim(),
+                    tetherTRC20Account: $('#tetherTRC20Account').val().trim(),
+                    referralCode: $('#referralCode').val().trim(),
+                    agreedToTerms: true
+                };
+                
+                // Check if user already exists
+                if (userDatabase[formData.email]) {
+                    throw new Error('An account with this email already exists');
+                }
+                
+                // Create user object
+                const userData = {
+                    id: Date.now(),
+                    name: formData.name,
+                    username: formData.username,
+                    email: formData.email,
+                    password: formData.password, // In a real app, this would be hashed
+                    secretQuestion: formData.secretQuestion,
+                    secretAnswer: formData.secretAnswer,
+                    bitcoinAccount: formData.bitcoinAccount,
+                    tetherTRC20Account: formData.tetherTRC20Account,
+                    referralCode: formData.referralCode,
+                    walletBalance: 0.00,
+                    depositBalance: 0.00,
+                    totalInvested: 0.00,
+                    totalProfit: 0.00,
+                    userReferralCode: 'USER' + Date.now(),
+                    registrationDate: new Date().toISOString()
+                };
+                
+                // Add user to database
+                userDatabase[formData.email] = userData;
+                localStorage.setItem('userDatabase', JSON.stringify(userDatabase));
+                
+                // Store credentials for auto-login
+                localStorage.setItem('userEmail', formData.email);
+                localStorage.setItem('userPassword', formData.password);
+                
+                showAlert('Registration successful! Creating your account...', 'success', 'register');
+                
+                // Store data with verification
+                const token = 'demo-token-' + Date.now();
+                localStorage.setItem('token', token);
+                localStorage.setItem('userData', JSON.stringify(userData));
+                localStorage.setItem('registrationDate', new Date().toISOString());
+                
+                // Verify storage was successful
+                const storedToken = localStorage.getItem('token');
+                const storedUser = localStorage.getItem('userData');
+                
+                if (storedToken && storedUser) {
+                    console.log('Data stored successfully, redirecting...');
+                    
+                    // Add a small delay to ensure localStorage is committed
+                    setTimeout(() => {
+                        // Force redirect with timeout prevention
+                        window.location.href = 'dashboard.html?fresh=true&t=' + Date.now();
+                    }, 1000);
+                    
+                } else {
+                    throw new Error('Failed to store user data');
+                }
+                
+            } catch (error) {
+                console.error('Registration error:', error);
+                showAlert(error.message || 'Registration failed. Please try again.', 'danger', 'register');
+            } finally {
+                showLoading(false, 'register');
             }
         }
 
         // Contact support function
         function contactSupport() {
             $('#forgotPasswordModal').modal('hide');
-            showAlert('Please email support@wctrade.com for password assistance.', 'info');
-        }
-
-        // Utility functions
-        function showAlert(message, type) {
-            const alertHtml = `
-                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
-                    ${message}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            `;
-            $('#alertContainer').html(alertHtml);
-            
-            // Auto dismiss after 5 seconds
-            setTimeout(() => {
-                $('.alert').alert('close');
-            }, 5000);
-        }
-
-        function showLoading(show) {
-            if (show) {
-                $('#loadingSpinner').show();
-                $('#loginButton').prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i> Signing In...');
-            } else {
-                $('#loadingSpinner').hide();
-                $('#loginButton').prop('disabled', false).html('<i class="fas fa-sign-in-alt me-2"></i> Sign In');
-            }
+            showAlert('Please email support@wctrade.com for password assistance.', 'info', 'login');
         }
 
         // Check if user is already logged in
@@ -588,8 +1146,43 @@ if (result.success) {
             }
         }
 
-        // Check for existing session on page load
-        checkExistingSession();
+        // Utility functions
+        function showAlert(message, type, formType = 'login') {
+            const containerId = formType === 'login' ? 'alertContainer' : 'registerAlertContainer';
+            const alertHtml = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            $('#' + containerId).html(alertHtml);
+            
+            // Auto dismiss after 5 seconds
+            setTimeout(() => {
+                $('.alert').alert('close');
+            }, 5000);
+        }
+
+        function showLoading(show, formType = 'login') {
+            const spinnerId = formType === 'login' ? 'loadingSpinner' : 'registerLoadingSpinner';
+            const buttonId = formType === 'login' ? 'loginButton' : 'registerButton';
+            
+            if (show) {
+                $('#' + spinnerId).show();
+                if (formType === 'login') {
+                    $('#' + buttonId).prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i> Signing In...');
+                } else {
+                    $('#' + buttonId).prop('disabled', true);
+                }
+            } else {
+                $('#' + spinnerId).hide();
+                if (formType === 'login') {
+                    $('#' + buttonId).prop('disabled', false).html('<i class="fas fa-sign-in-alt me-2"></i> Sign In');
+                } else {
+                    $('#' + buttonId).prop('disabled', false);
+                }
+            }
+        }
     </script>
 </body>
 </html>
