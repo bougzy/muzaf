@@ -1693,56 +1693,107 @@ $(document).ready(function() {
 });
 
 // Authentication check
+// function checkAuthentication() {
+//     const token = localStorage.getItem('token');
+//     if (!token) {
+//         window.location.href = 'login.html';
+//         return;
+//     }
+    
+//     // Fetch user data from backend
+//     fetchUserData();
+// }
+
+// // Fetch user data from backend
+// async function fetchUserData() {
+//     try {
+//         const response = await fetch(`${API_BASE_URL}/me`, {
+//             method: 'GET',
+//             headers: {
+//                 'Authorization': `Bearer ${localStorage.getItem('token')}`,
+//                 'Content-Type': 'application/json'
+//             }
+//         });
+
+//         if (!response.ok) {
+//             throw new Error('Failed to fetch user data');
+//         }
+
+//         const result = await response.json();
+        
+//         if (result.success) {
+//             currentUser = result.data.user;
+//             updateUserInterface();
+//         } else {
+//             throw new Error(result.message);
+//         }
+//     } catch (error) {
+//         console.error('Error fetching user data:', error);
+//         // Fallback to mock data for demo
+//         currentUser = {
+//             _id: '1',
+//             name: 'John Doe',
+//             email: 'john.doe@example.com',
+//             walletBalance: 12500.75,
+//             depositBalance: 8500.00,
+//             totalInvested: 7200.00,
+//             totalProfit: 3250.50,
+//             referralCode: 'GALAXY123',
+//             bitcoinAccount: '',
+//             tetherTRC20Account: '',
+//             secretQuestion: 'What is your mother\'s maiden name?',
+//             secretAnswer: ''
+//         };
+//         updateUserInterface();
+//     }
+// }
+
+// Authentication check
 function checkAuthentication() {
     const token = localStorage.getItem('token');
+    const userData = localStorage.getItem('userData');
+    
+    console.log('Auth check - Token exists:', !!token);
+    console.log('Auth check - User data exists:', !!userData);
+    
     if (!token) {
+        console.log('No token found, redirecting to login');
         window.location.href = 'login.html';
         return;
     }
     
-    // Fetch user data from backend
-    fetchUserData();
-}
-
-// Fetch user data from backend
-async function fetchUserData() {
+    // Try to parse user data, but don't redirect if it fails
     try {
-        const response = await fetch(`${API_BASE_URL}/me`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to fetch user data');
-        }
-
-        const result = await response.json();
-        
-        if (result.success) {
-            currentUser = result.data.user;
-            updateUserInterface();
+        if (userData) {
+            currentUser = JSON.parse(userData);
+            console.log('User data loaded:', currentUser.name);
         } else {
-            throw new Error(result.message);
+            console.log('No user data found, using mock data');
+            // Create mock user data from registration form if available
+            currentUser = {
+                id: 1,
+                name: 'New User',
+                email: 'user@example.com',
+                walletBalance: 0.00,
+                depositBalance: 0.00,
+                totalInvested: 0.00,
+                totalProfit: 0.00,
+                referralCode: 'NEWUSER123'
+            };
         }
+        updateUserInterface();
     } catch (error) {
-        console.error('Error fetching user data:', error);
-        // Fallback to mock data for demo
+        console.error('Error parsing user data:', error);
+        // Don't redirect on parse error, just use mock data
         currentUser = {
-            _id: '1',
-            name: 'John Doe',
-            email: 'john.doe@example.com',
-            walletBalance: 12500.75,
-            depositBalance: 8500.00,
-            totalInvested: 7200.00,
-            totalProfit: 3250.50,
-            referralCode: 'GALAXY123',
-            bitcoinAccount: '',
-            tetherTRC20Account: '',
-            secretQuestion: 'What is your mother\'s maiden name?',
-            secretAnswer: ''
+            id: 1,
+            name: 'New User',
+            email: 'user@example.com',
+            walletBalance: 0.00,
+            depositBalance: 0.00,
+            totalInvested: 0.00,
+            totalProfit: 0.00,
+            referralCode: 'NEWUSER123'
         };
         updateUserInterface();
     }
@@ -4353,9 +4404,28 @@ $('#maxRisk').on('input', function() {
 
 // Initialize the application
 $(document).ready(function() {
-    console.log('Galaxy Digital Trading Platform initialized');
+    console.log('World Currency Trade initialized');
 });
 
+// Debug session issues
+function debugSession() {
+    console.log('=== SESSION DEBUG INFO ===');
+    console.log('Token:', localStorage.getItem('token'));
+    console.log('User Data:', localStorage.getItem('userData'));
+    console.log('Current URL:', window.location.href);
+    console.log('Referrer:', document.referrer);
+    console.log('========================');
+}
+
+// Call this on dashboard load
+$(document).ready(function() {
+    debugSession();
+    checkAuthentication();
+    initializeWebSocket();
+    loadDashboardData();
+    setupEventListeners();
+    initializeTradingRoom();
+});
 
 </script>
 

@@ -797,31 +797,56 @@
                     result = await response.json();
                 }
                 
-                if (result.success) {
-                    showAlert('Registration successful! Redirecting to dashboard...', 'success');
+                // if (result.success) {
+                //     showAlert('Registration successful! Redirecting to dashboard...', 'success');
                     
-                    // Store user data and token in localStorage
-                    localStorage.setItem('token', result.data.token);
-                    localStorage.setItem('userData', JSON.stringify(result.data.user));
+                //     // Store user data and token in localStorage
+                //     localStorage.setItem('token', result.data.token);
+                //     localStorage.setItem('userData', JSON.stringify(result.data.user));
                     
-                    // Also store credentials for auto-login (in a real app, use secure methods)
-                    // Note: In production, you should never store passwords in plain text
-                    // This is just for demonstration purposes
-                    localStorage.setItem('userEmail', formData.email);
-                    localStorage.setItem('userPassword', formData.password);
+                //     // Also store credentials for auto-login (in a real app, use secure methods)
+                //     // Note: In production, you should never store passwords in plain text
+                //     // This is just for demonstration purposes
+                //     localStorage.setItem('userEmail', formData.email);
+                //     localStorage.setItem('userPassword', formData.password);
                     
-                    // Store registration timestamp
-                    localStorage.setItem('registrationDate', new Date().toISOString());
+                //     // Store registration timestamp
+                //     localStorage.setItem('registrationDate', new Date().toISOString());
                     
-                    // Redirect to dashboard after 2 seconds
-                    setTimeout(() => {
-                        window.location.href = 'dashboard.html';
-                    }, 2000);
+                //     // Redirect to dashboard after 2 seconds
+                //     setTimeout(() => {
+                //         window.location.href = 'dashboard.html';
+                //     }, 2000);
                     
-                } else {
-                    throw new Error(result.message || 'Registration failed');
-                }
+                // } else {
+                //     throw new Error(result.message || 'Registration failed');
+                // }
                 
+
+                if (result.success) {
+    showAlert('Registration successful! Redirecting to dashboard...', 'success');
+    
+    // Store user data and token in localStorage
+    localStorage.setItem('token', result.data.token);
+    localStorage.setItem('userData', JSON.stringify(result.data.user));
+    
+    // Also store credentials for auto-login (in a real app, use secure methods)
+    localStorage.setItem('userEmail', formData.email);
+    localStorage.setItem('userPassword', formData.password);
+    
+    // Store registration timestamp
+    localStorage.setItem('registrationDate', new Date().toISOString());
+    
+    // Add a small delay to ensure localStorage is written
+    setTimeout(() => {
+        console.log('Redirecting to dashboard with token:', localStorage.getItem('token'));
+        window.location.href = 'dashboard.html';
+    }, 1500);
+    
+} else {
+    throw new Error(result.message || 'Registration failed');
+}
+
             } catch (error) {
                 console.error('Registration error:', error);
                 showAlert(error.message || 'Registration failed. Please try again.', 'danger');
