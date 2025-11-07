@@ -1681,7 +1681,7 @@ let tradingSettings = {
 };
 
 // API Configuration
-const API_BASE_URL = 'https://muza-xi3w.onrender.com'; // Change to your backend URL when deployed
+const API_BASE_URL = 'https://muza-xi3w.onrender.com/api'; // Change to your backend URL when deployed
 
 // Initialize dashboard when page loads
 $(document).ready(function() {
@@ -1749,55 +1749,86 @@ $(document).ready(function() {
 // }
 
 // Authentication check
+// Enhanced Authentication check
 function checkAuthentication() {
     const token = localStorage.getItem('token');
     const userData = localStorage.getItem('userData');
     
-    console.log('Auth check - Token exists:', !!token);
-    console.log('Auth check - User data exists:', !!userData);
+    console.log('Auth Debug - Token:', token ? 'Exists' : 'Missing');
+    console.log('Auth Debug - UserData:', userData ? 'Exists' : 'Missing');
     
     if (!token) {
-        console.log('No token found, redirecting to login');
+        console.log('No authentication token found, redirecting to login');
         window.location.href = 'login.html';
         return;
     }
     
-    // Try to parse user data, but don't redirect if it fails
     try {
         if (userData) {
             currentUser = JSON.parse(userData);
-            console.log('User data loaded:', currentUser.name);
+            console.log('User data loaded successfully:', currentUser.name);
         } else {
-            console.log('No user data found, using mock data');
-            // Create mock user data from registration form if available
-            currentUser = {
-                id: 1,
-                name: 'New User',
-                email: 'user@example.com',
-                walletBalance: 0.00,
-                depositBalance: 0.00,
-                totalInvested: 0.00,
-                totalProfit: 0.00,
-                referralCode: 'NEWUSER123'
-            };
+            // Try to fetch user data from API
+            fetchUserData();
+            return;
         }
+        
         updateUserInterface();
+        initializeDashboard();
+        
     } catch (error) {
-        console.error('Error parsing user data:', error);
-        // Don't redirect on parse error, just use mock data
-        currentUser = {
-            id: 1,
-            name: 'New User',
-            email: 'user@example.com',
-            walletBalance: 0.00,
-            depositBalance: 0.00,
-            totalInvested: 0.00,
-            totalProfit: 0.00,
-            referralCode: 'NEWUSER123'
-        };
-        updateUserInterface();
+        console.error('Authentication error:', error);
+        // Clear invalid data and redirect to login
+        localStorage.clear();
+        window.location.href = 'login.html';
     }
 }
+
+// Fetch user data from API
+async function fetchUserData() {
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_BASE_URL}/me`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            if (result.success) {
+                currentUser = result.data.user;
+                localStorage.setItem('userData', JSON.stringify(currentUser));
+                updateUserInterface();
+                initializeDashboard();
+            } else {
+                throw new Error('Failed to fetch user data');
+            }
+        } else {
+            throw new Error('Network response was not ok');
+        }
+    } catch (error) {
+        console.error('Error fetching user data:', error);
+        localStorage.clear();
+        window.location.href = 'login.html';
+    }
+}
+
+// Initialize dashboard after successful auth
+function initializeDashboard() {
+    console.log('Dashboard initialization started');
+    initializeWebSocket();
+    loadDashboardData();
+    setupEventListeners();
+    
+    // Add a small delay to ensure everything is loaded
+    setTimeout(() => {
+        console.log('Dashboard fully initialized');
+        showSection('dashboard');
+    }, 500);
+}
+
 
 // Update user interface with user data
 function updateUserInterface() {
