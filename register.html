@@ -823,25 +823,46 @@
                 // }
                 
 
-                if (result.success) {
-    showAlert('Registration successful! Redirecting to dashboard...', 'success');
+                    // Improved registration success handler
+if (result.success) {
+    showAlert('Registration successful! Creating your account...', 'success');
     
-    // Store user data and token in localStorage
-    localStorage.setItem('token', result.data.token);
-    localStorage.setItem('userData', JSON.stringify(result.data.user));
+    // Ensure we have all required data
+    const userData = result.data.user || {
+        id: Date.now(),
+        name: formData.name,
+        username: formData.username,
+        email: formData.email,
+        walletBalance: 0.00,
+        depositBalance: 0.00,
+        totalInvested: 0.00,
+        totalProfit: 0.00,
+        referralCode: 'USER' + Date.now()
+    };
     
-    // Also store credentials for auto-login (in a real app, use secure methods)
-    localStorage.setItem('userEmail', formData.email);
-    localStorage.setItem('userPassword', formData.password);
+    const token = result.data.token || 'demo-token-' + Date.now();
     
-    // Store registration timestamp
+    // Store data with verification
+    localStorage.setItem('token', token);
+    localStorage.setItem('userData', JSON.stringify(userData));
     localStorage.setItem('registrationDate', new Date().toISOString());
     
-    // Add a small delay to ensure localStorage is written
-    setTimeout(() => {
-        console.log('Redirecting to dashboard with token:', localStorage.getItem('token'));
-        window.location.href = 'dashboard.html';
-    }, 1500);
+    // Verify storage was successful
+    const storedToken = localStorage.getItem('token');
+    const storedUser = localStorage.getItem('userData');
+    
+    if (storedToken && storedUser) {
+        console.log('Data stored successfully, redirecting...');
+        
+        // Add a small delay to ensure localStorage is committed
+        setTimeout(() => {
+            // Force redirect with timeout prevention
+            window.location.href = 'dashboard.html?fresh=true&t=' + Date.now();
+        }, 1000);
+        
+    } else {
+        throw new Error('Failed to store user data');
+    }
     
 } else {
     throw new Error(result.message || 'Registration failed');

@@ -3327,11 +3327,25 @@ function showToast(message, type) {
 }
 
 // Logout function
+// Enhanced logout function
 function logout() {
     if (confirm('Are you sure you want to logout?')) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('userData');
-        window.location.href = 'login.html';
+        // Clear session timer
+        if (sessionTimer) {
+            clearTimeout(sessionTimer);
+        }
+        
+        // Clear all storage
+        localStorage.clear();
+        sessionStorage.clear();
+        
+        // Clear any cookies
+        document.cookie.split(";").forEach(function(c) {
+            document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+        });
+        
+        // Force redirect to login
+        window.location.href = 'login.html?logout=true&t=' + Date.now();
     }
 }
 
@@ -3344,42 +3358,127 @@ $(document).ready(function() {
 
 
    // Authentication check
+// function checkAuthentication() {
+//     const token = localStorage.getItem('token');
+//     if (!token) {
+//         window.location.href = 'login.html';
+//         return;
+//     }
+    
+//     // In a real app, you would verify the token with your backend
+//     try {
+//         const userData = JSON.parse(localStorage.getItem('userData'));
+//         if (userData) {
+//             currentUser = userData;
+//             updateUserInterface();
+//         } else {
+//             // Mock user data for demo
+//             currentUser = {
+//                 id: 1,
+//                 name: 'John Doe',
+//                 email: 'john.doe@example.com',
+//                 walletBalance: 12500.75,
+//                 depositBalance: 8500.00,
+//                 totalInvested: 7200.00,
+//                 totalProfit: 3250.50,
+//                 referralCode: 'GALAXY123',
+//                 bitcoinAccount: '',
+//                 tetherTRC20Account: '',
+//                 secretQuestion: 'What is your mother\'s maiden name?',
+//                 secretAnswer: ''
+//             };
+//             localStorage.setItem('userData', JSON.stringify(currentUser));
+//             updateUserInterface();
+//         }
+//     } catch (error) {
+//         console.error('Error loading user data:', error);
+//         window.location.href = 'login.html';
+//     }
+// }
+
+// Improved Authentication check
 function checkAuthentication() {
     const token = localStorage.getItem('token');
+    const userData = localStorage.getItem('userData');
+    
+    console.log('Auth Debug - Token:', token ? 'Exists' : 'Missing');
+    console.log('Auth Debug - UserData:', userData ? 'Exists' : 'Missing');
+    
     if (!token) {
+        console.log('No authentication token found, redirecting to login');
+        // Clear any partial data
+        localStorage.removeItem('userData');
+        localStorage.removeItem('userEmail');
+        localStorage.removeItem('userPassword');
         window.location.href = 'login.html';
         return;
     }
     
-    // In a real app, you would verify the token with your backend
     try {
-        const userData = JSON.parse(localStorage.getItem('userData'));
         if (userData) {
-            currentUser = userData;
-            updateUserInterface();
+            currentUser = JSON.parse(userData);
+            console.log('User data loaded successfully:', currentUser.name);
         } else {
-            // Mock user data for demo
+            // Create minimal user data if missing
+            console.log('Creating minimal user data');
             currentUser = {
-                id: 1,
-                name: 'John Doe',
-                email: 'john.doe@example.com',
-                walletBalance: 12500.75,
-                depositBalance: 8500.00,
-                totalInvested: 7200.00,
-                totalProfit: 3250.50,
-                referralCode: 'GALAXY123',
-                bitcoinAccount: '',
-                tetherTRC20Account: '',
-                secretQuestion: 'What is your mother\'s maiden name?',
-                secretAnswer: ''
+                id: Date.now(),
+                name: 'Trader',
+                email: 'user@example.com',
+                walletBalance: 0.00,
+                depositBalance: 0.00,
+                totalInvested: 0.00,
+                totalProfit: 0.00,
+                referralCode: 'TRADER' + Date.now()
             };
             localStorage.setItem('userData', JSON.stringify(currentUser));
-            updateUserInterface();
         }
+        
+        // Verify token is valid (in a real app, this would call your backend)
+        if (!verifyToken(token)) {
+            throw new Error('Invalid token');
+        }
+        
+        updateUserInterface();
+        initializeDashboard();
+        
     } catch (error) {
-        console.error('Error loading user data:', error);
+        console.error('Authentication error:', error);
+        // Clear invalid data and redirect to login
+        localStorage.clear();
         window.location.href = 'login.html';
     }
+}
+
+// Token verification function
+function verifyToken(token) {
+    // In a real app, this would verify with your backend
+    // For demo purposes, we'll do basic validation
+    if (!token || token === 'undefined' || token === 'null') {
+        return false;
+    }
+    
+    // Check if token has basic structure
+    if (typeof token !== 'string' || token.length < 10) {
+        return false;
+    }
+    
+    return true;
+}
+
+// Initialize dashboard after successful auth
+function initializeDashboard() {
+    console.log('Dashboard initialization started');
+    initializeWebSocket();
+    loadDashboardData();
+    setupEventListeners();
+    
+    // Add a small delay to ensure everything is loaded
+    setTimeout(() => {
+        console.log('Dashboard fully initialized');
+        // Force show dashboard section
+        showSection('dashboard');
+    }, 500);
 }
 
 // Update user interface with user data
@@ -4426,6 +4525,36 @@ $(document).ready(function() {
     setupEventListeners();
     initializeTradingRoom();
 });
+
+
+// Session management
+let sessionTimer;
+
+function startSessionTimer() {
+    // Reset any existing timer
+    if (sessionTimer) {
+        clearTimeout(sessionTimer);
+    }
+    
+    // Set session timeout for 24 hours (in a real app, this would be shorter)
+    sessionTimer = setTimeout(() => {
+        console.log('Session expired');
+        logout();
+    }, 24 * 60 * 60 * 1000); // 24 hours
+}
+
+function resetSessionTimer() {
+    startSessionTimer();
+}
+
+// Listen for user activity to reset session timer
+document.addEventListener('mousemove', resetSessionTimer);
+document.addEventListener('keypress', resetSessionTimer);
+document.addEventListener('click', resetSessionTimer);
+
+// Initialize session timer when dashboard loads
+startSessionTimer();
+
 
 </script>
 

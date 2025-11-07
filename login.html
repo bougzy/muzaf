@@ -507,31 +507,37 @@
                     result = await response.json();
                 }
                 
-                if (result.success) {
-                    showAlert('Login successful! Redirecting to dashboard...', 'success');
-                    
-                    // Store user data and token
-                    localStorage.setItem('token', result.data.token);
-                    localStorage.setItem('userData', JSON.stringify(result.data.user));
-                    
-                    // Remember email if requested
-                    if ($('#rememberMe').is(':checked')) {
-                        localStorage.setItem('rememberedEmail', loginData.email);
-                    } else {
-                        localStorage.removeItem('rememberedEmail');
-                    }
-                    
-                    // Store login timestamp
-                    localStorage.setItem('lastLogin', new Date().toISOString());
-                    
-                    // Redirect to dashboard after 1 second
-                    setTimeout(() => {
-                        window.location.href = 'dashboard.html';
-                    }, 1000);
-                    
-                } else {
-                    throw new Error(result.message);
-                }
+                // Improved login success handler
+if (result.success) {
+    showAlert('Login successful! Redirecting...', 'success');
+    
+    // Store user data and token
+    const token = result.data.token || 'demo-token-' + Date.now();
+    const userData = result.data.user || JSON.parse(localStorage.getItem('userData') || '{}');
+    
+    localStorage.setItem('token', token);
+    localStorage.setItem('userData', JSON.stringify(userData));
+    localStorage.setItem('lastLogin', new Date().toISOString());
+    
+    // Remember email if requested
+    if ($('#rememberMe').is(':checked')) {
+        localStorage.setItem('rememberedEmail', loginData.email);
+    } else {
+        localStorage.removeItem('rememberedEmail');
+    }
+    
+    // Verify storage and redirect
+    setTimeout(() => {
+        if (localStorage.getItem('token')) {
+            window.location.href = 'dashboard.html?login=true&t=' + Date.now();
+        } else {
+            throw new Error('Login data not stored properly');
+        }
+    }, 800);
+    
+} else {
+    throw new Error(result.message);
+}
                 
             } catch (error) {
                 console.error('Login error:', error);
