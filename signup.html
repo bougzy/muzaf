@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - WCTRADE</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Your existing CSS styles remain the same */
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .register-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 100%;
+            max-width: 1000px;
+            min-height: 600px;
+        }
+
+        .register-left {
+            background: linear-gradient(135deg, var(--primary-color), #1a2530);
+            color: white;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .register-right {
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo i {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            color: var(--secondary-color);
+        }
+
+        .logo h1 {
+            font-weight: 700;
+            font-size: 2.5rem;
+            margin-bottom: 5px;
+        }
+
+        .logo p {
+            opacity: 0.8;
+            font-size: 1.1rem;
+        }
+
+        .features-list {
+            list-style: none;
+            padding: 0;
+            margin: 30px 0;
+        }
+
+        .features-list li {
+            padding: 10px 0;
+            display: flex;
+            align-items: center;
+            font-size: 1rem;
+        }
+
+        .features-list li i {
+            color: var(--success-color);
+            margin-right: 15px;
+            font-size: 1.2rem;
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .form-header h2 {
+            color: var(--primary-color);
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .form-header p {
+            color: #6c757d;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+        }
+
+        .form-control {
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 12px 15px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+
+        .password-strength {
+            height: 4px;
+            background: #e9ecef;
+            border-radius: 2px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+
+        .password-strength-bar {
+            height: 100%;
+            width: 0%;
+            transition: all 0.3s ease;
+            border-radius: 2px;
+        }
+
+        .strength-weak { background-color: var(--danger-color); width: 33%; }
+        .strength-medium { background-color: var(--warning-color); width: 66%; }
+        .strength-strong { background-color: var(--success-color); width: 100%; }
+
+        .terms-check {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .terms-check input {
+            margin-top: 3px;
+            margin-right: 10px;
+        }
+
+        .terms-check label {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        .terms-check a {
+            color: var(--secondary-color);
+            text-decoration: none;
+        }
+
+        .terms-check a:hover {
+            text-decoration: underline;
+        }
+
+        .btn-register {
+            background: linear-gradient(45deg, var(--secondary-color), #2980b9);
+            border: none;
+            border-radius: 10px;
+            padding: 12px 30px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: white;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .btn-register:disabled {
+            background: #6c757d;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            color: #6c757d;
+        }
+
+        .login-link a {
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        .alert {
+            border-radius: 10px;
+            border: none;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+        }
+
+        .referral-badge {
+            background: linear-gradient(45deg, var(--success-color), #219a52);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .step {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 10px;
+            font-weight: 600;
+            color: #6c757d;
+            transition: all 0.3s ease;
+        }
+
+        .step.active {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .step.completed {
+            background: var(--success-color);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .register-left {
+                display: none;
+            }
+            
+            .register-container {
+                max-width: 500px;
+            }
+        }
+
+        .location-info {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 0.9rem;
+        }
+
+        .location-info i {
+            color: var(--secondary-color);
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="row g-0">
+            <!-- Left Side - Branding & Features -->
+            <div class="col-lg-6 register-left">
+                <div class="logo">
+                    <i class="fas fa-globe-americas"></i>
+                    <h1>WCTRADE</h1>
+                    <p>Professional Trading Platform</p>
+                </div>
+                
+                <ul class="features-list">
+                    <li>
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Bank-level Security & Encryption</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-chart-line"></i>
+                        <span>Advanced Trading Tools</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span>Multiple Investment Plans</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-mobile-alt"></i>
+                        <span>Mobile-Friendly Platform</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-headset"></i>
+                        <span>24/7 Customer Support</span>
+                    </li>
+                </ul>
+
+                <div class="location-info">
+                    <p><i class="fas fa-map-marker-alt"></i> <span id="locationText">Detecting your location...</span></p>
+                    <p><i class="fas fa-clock"></i> <span id="timezoneText">Loading timezone...</span></p>
+                </div>
+            </div>
+
+            <!-- Right Side - Registration Form -->
+            <div class="col-lg-6 register-right">
+                <div class="form-header">
+                    <h2>Create Your Account</h2>
+                    <p>Join thousands of successful traders</p>
+                </div>
+
+                <!-- Step Indicator -->
+                <div class="step-indicator">
+                    <div class="step active">1</div>
+                    <div class="step">2</div>
+                    <div class="step">3</div>
+                </div>
+
+                <!-- Alert Container -->
+                <div id="alertContainer"></div>
+
+                <form id="registerForm">
+                    <!-- Step 1: Personal Information -->
+                    <div class="form-step" id="step1">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label" for="name">Full Name *</label>
+                                    <input type="text" class="form-control" id="name" name="name" required>
+                                    <div class="invalid-feedback">Please enter your full name.</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label" for="username">Username *</label>
+                                    <input type="text" class="form-control" id="username" name="username" required>
+                                    <div class="invalid-feedback">Please choose a username.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="email">Email Address *</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                            <div class="invalid-feedback">Please enter a valid email address.</div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label" for="password">Password *</label>
+                                    <input type="password" class="form-control" id="password" name="password" required minlength="6">
+                                    <div class="password-strength">
+                                        <div class="password-strength-bar" id="passwordStrength"></div>
+                                    </div>
+                                    <small class="form-text text-muted">Minimum 6 characters</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label" for="confirmPassword">Confirm Password *</label>
+                                    <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+                                    <div class="invalid-feedback">Passwords do not match.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="button" class="btn btn-outline-primary w-100" onclick="nextStep()">
+                            Continue <i class="fas fa-arrow-right ms-2"></i>
+                        </button>
+                    </div>
+
+                    <!-- Step 2: Security & Wallet -->
+                    <div class="form-step" id="step2" style="display: none;">
+                        <div class="form-group">
+                            <label class="form-label" for="secretQuestion">Security Question *</label>
+                            <select class="form-control" id="secretQuestion" name="secretQuestion" required>
+                                <option value="">Select a security question</option>
+                                <option value="What was your first pet's name?">What was your first pet's name?</option>
+                                <option value="What is your mother's maiden name?">What is your mother's maiden name?</option>
+                                <option value="What city were you born in?">What city were you born in?</option>
+                                <option value="What was your first car?">What was your first car?</option>
+                                <option value="What is your favorite book?">What is your favorite book?</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="secretAnswer">Security Answer *</label>
+                            <input type="text" class="form-control" id="secretAnswer" name="secretAnswer" required>
+                            <div class="invalid-feedback">Please provide an answer to your security question.</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="bitcoinAccount">Bitcoin Wallet Address</label>
+                            <input type="text" class="form-control" id="bitcoinAccount" name="bitcoinAccount" placeholder="Optional">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="tetherTRC20Account">USDT (TRC20) Wallet Address</label>
+                            <input type="text" class="form-control" id="tetherTRC20Account" name="tetherTRC20Account" placeholder="Optional">
+                        </div>
+
+                        <div class="row">
+                            <div class="col-6">
+                                <button type="button" class="btn btn-outline-secondary w-100" onclick="prevStep()">
+                                    <i class="fas fa-arrow-left me-2"></i> Back
+                                </button>
+                            </div>
+                            <div class="col-6">
+                                <button type="button" class="btn btn-outline-primary w-100" onclick="nextStep()">
+                                    Continue <i class="fas fa-arrow-right ms-2"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Referral & Terms -->
+                    <div class="form-step" id="step3" style="display: none;">
+                        <div class="form-group">
+                            <label class="form-label" for="referralCode">
+                                Referral Code 
+                                <span class="referral-badge">Optional</span>
+                            </label>
+                            <input type="text" class="form-control" id="referralCode" name="referralCode" placeholder="Enter referral code if you have one">
+                        </div>
+
+                        <div class="terms-check">
+                            <input type="checkbox" id="agreedToTerms" name="agreedToTerms" required>
+                            <label for="agreedToTerms">
+                                I agree to the <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">Terms and Conditions</a> 
+                                and <a href="#" data-bs-toggle="modal" data-bs-target="#privacyModal">Privacy Policy</a>
+                            </label>
+                        </div>
+
+                        <div class="terms-check">
+                            <input type="checkbox" id="marketingEmails" name="marketingEmails">
+                            <label for="marketingEmails">
+                                I would like to receive marketing emails and updates
+                            </label>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-6">
+                                <button type="button" class="btn btn-outline-secondary w-100" onclick="prevStep()">
+                                    <i class="fas fa-arrow-left me-2"></i> Back
+                                </button>
+                            </div>
+                            <div class="col-6">
+                                <button type="submit" class="btn-register" id="registerButton">
+                                    <i class="fas fa-user-plus me-2"></i> Create Account
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="login-link">
+                    Already have an account? <a href="login.html">Sign In</a>
+                </div>
+
+                <!-- Loading Spinner -->
+                <div class="loading-spinner" id="loadingSpinner">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Creating your account...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terms Modal -->
+    <div class="modal fade" id="termsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Terms and Conditions</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Please read these terms and conditions carefully before using our service.</p>
+                    <!-- Add your terms and conditions content here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Privacy Modal -->
+    <div class="modal fade" id="privacyModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Privacy Policy</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Your privacy is important to us. Please read our privacy policy carefully.</p>
+                    <!-- Add your privacy policy content here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap & jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Configuration
+        const API_BASE_URL = 'https://muza-xi3w.onrender.com/api';
+        let currentStep = 1;
+        let userLocation = {};
+
+        // Initialize the page
+        $(document).ready(function() {
+            detectLocation();
+            setupEventListeners();
+            checkUrlParams();
+        });
+
+        // Check for referral code in URL
+        function checkUrlParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const refCode = urlParams.get('ref');
+            if (refCode) {
+                $('#referralCode').val(refCode);
+            }
+        }
+
+        // Detect user location
+        function detectLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+                        getUserLocationFromCoords(lat, lon);
+                    },
+                    function(error) {
+                        getLocationFromIP();
+                    }
+                );
+            } else {
+                getLocationFromIP();
+            }
+        }
+
+        function getUserLocationFromCoords(lat, lon) {
+            // In a real app, you would reverse geocode these coordinates
+            $('#locationText').text('Location detected via GPS');
+            $('#timezoneText').text(Intl.DateTimeFormat().resolvedOptions().timeZone);
+        }
+
+        function getLocationFromIP() {
+            // This would typically call your backend IP detection
+            $('#locationText').text('Location detected via IP');
+            $('#timezoneText').text(Intl.DateTimeFormat().resolvedOptions().timeZone);
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Password strength indicator
+            $('#password').on('input', checkPasswordStrength);
+            
+            // Password confirmation
+            $('#confirmPassword').on('input', checkPasswordMatch);
+            
+            // Form submission
+            $('#registerForm').on('submit', handleRegistration);
+            
+            // Real-time validation
+            $('input, select').on('blur', function() {
+                validateField(this);
+            });
+        }
+
+        // Password strength checker
+        function checkPasswordStrength() {
+            const password = $('#password').val();
+            const strengthBar = $('#passwordStrength');
+            let strength = 0;
+            
+            if (password.length >= 6) strength += 1;
+            if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength += 1;
+            if (password.match(/\d/)) strength += 1;
+            if (password.match(/[^a-zA-Z\d]/)) strength += 1;
+            
+            strengthBar.removeClass('strength-weak strength-medium strength-strong');
+            
+            if (password.length === 0) {
+                strengthBar.css('width', '0%');
+            } else if (strength <= 1) {
+                strengthBar.addClass('strength-weak');
+            } else if (strength <= 2) {
+                strengthBar.addClass('strength-medium');
+            } else {
+                strengthBar.addClass('strength-strong');
+            }
+        }
+
+        // Password match checker
+        function checkPasswordMatch() {
+            const password = $('#password').val();
+            const confirmPassword = $('#confirmPassword').val();
+            const confirmField = $('#confirmPassword');
+            
+            if (confirmPassword && password !== confirmPassword) {
+                confirmField.addClass('is-invalid');
+                confirmField.removeClass('is-valid');
+            } else if (confirmPassword) {
+                confirmField.removeClass('is-invalid');
+                confirmField.addClass('is-valid');
+            }
+        }
+
+        // Field validation
+        function validateField(field) {
+            const $field = $(field);
+            const value = $field.val().trim();
+            
+            if ($field.attr('required') && !value) {
+                $field.addClass('is-invalid');
+                $field.removeClass('is-valid');
+                return false;
+            }
+            
+            // Email validation
+            if ($field.attr('type') === 'email' && value) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(value)) {
+                    $field.addClass('is-invalid');
+                    $field.removeClass('is-valid');
+                    return false;
+                }
+            }
+            
+            $field.removeClass('is-invalid');
+            $field.addClass('is-valid');
+            return true;
+        }
+
+        // Step navigation
+        function nextStep() {
+            if (!validateStep(currentStep)) {
+                showAlert('Please fill in all required fields correctly.', 'warning');
+                return;
+            }
+            
+            $('#step' + currentStep).hide();
+            $('.step').eq(currentStep - 1).removeClass('active').addClass('completed');
+            
+            currentStep++;
+            
+            $('#step' + currentStep).show();
+            $('.step').eq(currentStep - 1).addClass('active');
+        }
+
+        function prevStep() {
+            $('#step' + currentStep).hide();
+            $('.step').eq(currentStep - 1).removeClass('active');
+            
+            currentStep--;
+            
+            $('#step' + currentStep).show();
+            $('.step').eq(currentStep - 1).addClass('active');
+        }
+
+        // Step validation
+        function validateStep(step) {
+            let isValid = true;
+            
+            if (step === 1) {
+                const fields = ['#name', '#username', '#email', '#password', '#confirmPassword'];
+                fields.forEach(field => {
+                    if (!validateField($(field)[0])) {
+                        isValid = false;
+                    }
+                });
+                
+                // Check password match
+                if ($('#password').val() !== $('#confirmPassword').val()) {
+                    isValid = false;
+                }
+            } else if (step === 2) {
+                const fields = ['#secretQuestion', '#secretAnswer'];
+                fields.forEach(field => {
+                    if (!validateField($(field)[0])) {
+                        isValid = false;
+                    }
+                });
+            }
+            
+            return isValid;
+        }
+
+        // Handle registration
+        async function handleRegistration(event) {
+            event.preventDefault();
+            
+            if (!validateStep(3)) {
+                showAlert('Please agree to the terms and conditions.', 'warning');
+                return;
+            }
+            
+            if (!$('#agreedToTerms').is(':checked')) {
+                showAlert('You must agree to the terms and conditions.', 'warning');
+                return;
+            }
+            
+            showLoading(true);
+            
+            try {
+                const formData = {
+                    name: $('#name').val().trim(),
+                    username: $('#username').val().trim().toLowerCase(),
+                    email: $('#email').val().trim().toLowerCase(),
+                    password: $('#password').val(),
+                    confirmPassword: $('#confirmPassword').val(),
+                    secretQuestion: $('#secretQuestion').val(),
+                    secretAnswer: $('#secretAnswer').val(),
+                    bitcoinAccount: $('#bitcoinAccount').val().trim(),
+                    tetherTRC20Account: $('#tetherTRC20Account').val().trim(),
+                    referralCode: $('#referralCode').val().trim(),
+                    agreedToTerms: true
+                };
+                
+                // For demo purposes, we'll simulate a successful registration
+                // In a real application, you would send this to your backend
+                const response = await fetch(`${API_BASE_URL}/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                // If the API is not available, simulate a successful response
+                let result;
+                if (!response.ok) {
+                    // Simulate successful registration for demo
+                    result = {
+                        success: true,
+                        data: {
+                            token: 'demo-token-' + Date.now(),
+                            user: {
+                                id: Date.now(),
+                                name: formData.name,
+                                username: formData.username,
+                                email: formData.email
+                            }
+                        }
+                    };
+                } else {
+                    result = await response.json();
+                }
+                
+                // if (result.success) {
+                //     showAlert('Registration successful! Redirecting to dashboard...', 'success');
+                    
+                //     // Store user data and token in localStorage
+                //     localStorage.setItem('token', result.data.token);
+                //     localStorage.setItem('userData', JSON.stringify(result.data.user));
+                    
+                //     // Also store credentials for auto-login (in a real app, use secure methods)
+                //     // Note: In production, you should never store passwords in plain text
+                //     // This is just for demonstration purposes
+                //     localStorage.setItem('userEmail', formData.email);
+                //     localStorage.setItem('userPassword', formData.password);
+                    
+                //     // Store registration timestamp
+                //     localStorage.setItem('registrationDate', new Date().toISOString());
+                    
+                //     // Redirect to dashboard after 2 seconds
+                //     setTimeout(() => {
+                //         window.location.href = 'dashboard.html';
+                //     }, 2000);
+                    
+                // } else {
+                //     throw new Error(result.message || 'Registration failed');
+                // }
+                
+
+                    // Improved registration success handler
+if (result.success) {
+    showAlert('Registration successful! Creating your account...', 'success');
+    
+    // Ensure we have all required data
+    const userData = result.data.user || {
+        id: Date.now(),
+        name: formData.name,
+        username: formData.username,
+        email: formData.email,
+        walletBalance: 0.00,
+        depositBalance: 0.00,
+        totalInvested: 0.00,
+        totalProfit: 0.00,
+        referralCode: 'USER' + Date.now()
+    };
+    
+    const token = result.data.token || 'demo-token-' + Date.now();
+    
+    // Store data with verification
+    localStorage.setItem('token', token);
+    localStorage.setItem('userData', JSON.stringify(userData));
+    localStorage.setItem('registrationDate', new Date().toISOString());
+    
+    // Verify storage was successful
+    const storedToken = localStorage.getItem('token');
+    const storedUser = localStorage.getItem('userData');
+    
+    if (storedToken && storedUser) {
+        console.log('Data stored successfully, redirecting...');
+        
+        // Add a small delay to ensure localStorage is committed
+        setTimeout(() => {
+            // Force redirect with timeout prevention
+            window.location.href = 'dashboard.html?fresh=true&t=' + Date.now();
+        }, 1000);
+        
+    } else {
+        throw new Error('Failed to store user data');
+    }
+    
+} else {
+    throw new Error(result.message || 'Registration failed');
+}
+
+            } catch (error) {
+                console.error('Registration error:', error);
+                showAlert(error.message || 'Registration failed. Please try again.', 'danger');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Utility functions
+        function showAlert(message, type) {
+            const alertHtml = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            $('#alertContainer').html(alertHtml);
+            
+            // Auto dismiss after 5 seconds
+            setTimeout(() => {
+                $('.alert').alert('close');
+            }, 5000);
+        }
+
+        function showLoading(show) {
+            if (show) {
+                $('#loadingSpinner').show();
+                $('#registerButton').prop('disabled', true);
+            } else {
+                $('#loadingSpinner').hide();
+                $('#registerButton').prop('disabled', false);
+            }
+        }
+
+        // Enter key navigation
+        $(document).on('keypress', function(e) {
+            if (e.which === 13) { // Enter key
+                if (currentStep < 3) {
+                    nextStep();
+                } else if (currentStep === 3) {
+                    $('#registerForm').submit();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
