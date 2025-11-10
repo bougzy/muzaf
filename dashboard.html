@@ -1060,13 +1060,13 @@
                         <h5 class="mb-4">Quick Actions</h5>
                         <div class="row text-center">
                             <div class="col-md-3 mb-3">
-                                <button class="btn btn-primary w-100 py-3" onclick="showSection('deposit')">
+                                <button class="btn btn-primary w-100 py-3" onclick="showDepositModal()">
                                     <i class="fas fa-plus-circle fa-2x mb-2"></i><br>
                                     Deposit Funds
                                 </button>
                             </div>
                             <div class="col-md-3 mb-3">
-                                <button class="btn btn-success w-100 py-3" onclick="showSection('invest')">
+                                <button class="btn btn-success w-100 py-3" onclick="showInvestmentModal()">
                                     <i class="fas fa-chart-line fa-2x mb-2"></i><br>
                                     New Investment
                                 </button>
@@ -1441,7 +1441,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="depositForm">
+                    <form id="depositForm" enctype="multipart/form-data">
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Amount (USD)</label>
@@ -1662,6 +1662,7 @@
 
     <script>
         // Global variables
+        const API_BASE_URL = 'https://muza-xi3w.onrender.com/api';
         let currentUser = null;
         let websocket = null;
         let earningsChart = null;
@@ -1696,43 +1697,168 @@
                 return;
             }
             
-            // Decode token to get user info (in a real app, this would be verified server-side)
+            // Load user data from API
+            loadUserData();
+        }
+
+        // Load user data from API
+        async function loadUserData() {
             try {
-                const payload = JSON.parse(atob(token.split('.')[1]));
-                currentUser = payload;
-                $('#userName').text(payload.name || 'User');
-                $('#userAvatar').text(payload.name ? payload.name.substring(0, 2).toUpperCase() : 'JD');
-                $('#profileName').val(payload.name || '');
-                $('#profileEmail').val(payload.email || '');
-            } catch (e) {
-                console.error('Invalid token:', e);
-                logout();
+                showLoading(true);
+                const response = await fetch(`${API_BASE_URL}/me`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch user data');
+                }
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    currentUser = result.data.user;
+                    updateUserInterface(currentUser);
+                } else {
+                    throw new Error(result.message || 'Failed to load user data');
+                }
+            } catch (error) {
+                console.error('Error loading user data:', error);
+                showToast('Failed to load user data. Please try again.', 'danger');
+                // If token is invalid, redirect to login
+                if (error.message.includes('token') || error.message.includes('unauthorized')) {
+                    logout();
+                }
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Update UI with user data
+        function updateUserInterface(user) {
+            $('#userName').text(user.name || user.username || 'User');
+            $('#userAvatar').text(user.name ? user.name.substring(0, 2).toUpperCase() : 'JD');
+            $('#profileName').val(user.name || '');
+            $('#profileEmail').val(user.email || '');
+            $('#profileBitcoin').val(user.bitcoinAccount || '');
+            $('#profileTether').val(user.tetherTRC20Account || '');
+            $('#profileQuestion').val(user.secretQuestion || '');
+            
+            // Update balances
+            $('#walletBalance').text(`$${(user.walletBalance || 0).toFixed(2)}`);
+            $('#depositBalance').text(`$${(user.depositBalance || 0).toFixed(2)}`);
+            $('#totalInvested').text(`$${(user.totalInvested || 0).toFixed(2)}`);
+            $('#tradingBalance').text(`$${(user.walletBalance || 0).toFixed(2)}`);
+            $('#availableDeposit').text((user.depositBalance || 0).toFixed(2));
+            
+            // Update referral code
+            if (user.referralCode) {
+                $('#referralCode').val(user.referralCode);
+                $('#referralLink').val(`${window.location.origin}/register.html?ref=${user.referralCode}`);
             }
         }
 
         // Initialize WebSocket connection
         function initializeWebSocket() {
             try {
-                // In a real app, this would connect to your WebSocket server
-                websocket = {
-                    readyState: 1, // Simulating connected state
-                    send: function(data) {
-                        console.log('WebSocket message sent:', data);
+                const token = localStorage.getItem('token');
+                if (!token) return;
+
+                // Connect to WebSocket
+                const wsUrl = API_BASE_URL.replace('https', 'wss').replace('http', 'ws') + '/ws';
+                websocket = new WebSocket(wsUrl);
+                
+                websocket.onopen = function() {
+                    console.log('WebSocket connected');
+                    updateWebSocketStatus(true);
+                    
+                    // Authenticate with token
+                    websocket.send(JSON.stringify({
+                        type: 'AUTH',
+                        token: token
+                    }));
+                };
+                
+                websocket.onmessage = function(event) {
+                    try {
+                        const data = JSON.parse(event.data);
+                        handleWebSocketMessage(data);
+                    } catch (error) {
+                        console.error('Error parsing WebSocket message:', error);
                     }
                 };
                 
-                updateWebSocketStatus(true);
+                websocket.onclose = function() {
+                    console.log('WebSocket disconnected');
+                    updateWebSocketStatus(false);
+                    
+                    // Attempt to reconnect after 5 seconds
+                    setTimeout(initializeWebSocket, 5000);
+                };
                 
-                // Simulate receiving market data
-                setInterval(() => {
-                    if (websocket && websocket.readyState === 1) {
-                        simulateMarketData();
-                    }
-                }, 2000);
+                websocket.onerror = function(error) {
+                    console.error('WebSocket error:', error);
+                    updateWebSocketStatus(false);
+                };
                 
             } catch (error) {
                 console.error('WebSocket connection failed:', error);
                 updateWebSocketStatus(false);
+            }
+        }
+
+        function handleWebSocketMessage(data) {
+            switch (data.type) {
+                case 'CONNECTED':
+                    console.log('WebSocket authenticated successfully');
+                    break;
+                    
+                case 'NEW_NOTIFICATION':
+                    showToast(data.message, 'info');
+                    loadNotifications();
+                    break;
+                    
+                case 'DEPOSIT_APPROVED':
+                    showToast(data.message, 'success');
+                    updateUserBalances(data);
+                    loadDashboardData();
+                    break;
+                    
+                case 'INVESTMENT_APPROVED':
+                    showToast(data.message, 'success');
+                    updateUserBalances(data);
+                    loadDashboardData();
+                    break;
+                    
+                case 'PROFIT_ADDED':
+                    showToast(data.message, 'success');
+                    updateUserBalances(data);
+                    loadDashboardData();
+                    break;
+                    
+                case 'BALANCE_UPDATE':
+                    showToast(data.message, 'info');
+                    updateUserBalances(data);
+                    break;
+                    
+                default:
+                    console.log('Unknown WebSocket message:', data);
+            }
+        }
+
+        function updateUserBalances(data) {
+            if (data.walletBalance !== undefined) {
+                $('#walletBalance').text(`$${data.walletBalance.toFixed(2)}`);
+                $('#tradingBalance').text(`$${data.walletBalance.toFixed(2)}`);
+            }
+            if (data.depositBalance !== undefined) {
+                $('#depositBalance').text(`$${data.depositBalance.toFixed(2)}`);
+                $('#availableDeposit').text(data.depositBalance.toFixed(2));
+            }
+            if (data.totalInvested !== undefined) {
+                $('#totalInvested').text(`$${data.totalInvested.toFixed(2)}`);
             }
         }
 
@@ -1808,9 +1934,16 @@
             // Show selected section
             if (section === 'dashboard') {
                 $('#dashboardSection').show();
+                loadDashboardData();
             } else if (section === 'trading') {
                 $('#tradingSection').show();
                 initializeTradingRoom();
+            } else if (section === 'deposit') {
+                showDepositModal();
+            } else if (section === 'invest') {
+                showInvestmentModal();
+            } else if (section === 'transactions') {
+                loadTransactionsSection();
             } else {
                 $('#otherSections').show();
                 loadSectionContent(section);
@@ -1818,35 +1951,52 @@
         }
 
         // Load dashboard data
-        function loadDashboardData() {
+        async function loadDashboardData() {
             showLoading(true);
             
-            // Simulate API call
-            setTimeout(() => {
-                // Update wallet balances
-                $('#walletBalance').text('$5,250.75');
-                $('#depositBalance').text('$3,500.00');
-                $('#totalInvested').text('$2,800.00');
-                $('#totalProfit').text('$420.50');
-                
-                // Update quick stats
-                $('#quickWeekEarnings').text('$125.50');
-                $('#quickReferrals').text('3');
-                
-                // Initialize earnings chart
-                initializeEarningsChart();
-                
-                // Load recent activity
-                loadRecentActivity();
-                
-                // Load investments
-                loadInvestments();
-                
+            try {
+                // Load user investments
+                const investmentsResponse = await fetch(`${API_BASE_URL}/user/investments`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (investmentsResponse.ok) {
+                    const result = await investmentsResponse.json();
+                    if (result.success) {
+                        loadInvestments(result.data);
+                    }
+                }
+
+                // Load transactions
+                const transactionsResponse = await fetch(`${API_BASE_URL}/user/transactions`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (transactionsResponse.ok) {
+                    const result = await transactionsResponse.json();
+                    if (result.success) {
+                        loadRecentActivity(result.data);
+                    }
+                }
+
                 // Load notifications
                 loadNotifications();
-                
+
+                // Initialize earnings chart
+                initializeEarningsChart();
+
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+                showToast('Failed to load dashboard data', 'danger');
+            } finally {
                 showLoading(false);
-            }, 1000);
+            }
         }
 
         // Initialize earnings chart
@@ -1896,72 +2046,74 @@
         }
 
         // Load recent activity
-        function loadRecentActivity() {
-            const activities = [
-                { type: 'deposit', amount: '$500.00', date: '2 hours ago', status: 'completed' },
-                { type: 'investment', amount: '$1,000.00', date: '1 day ago', status: 'active' },
-                { type: 'withdrawal', amount: '$250.00', date: '2 days ago', status: 'pending' },
-                { type: 'profit', amount: '$75.50', date: '3 days ago', status: 'completed' }
-            ];
+        function loadRecentActivity(transactions) {
+            if (!transactions || !Array.isArray(transactions)) return;
             
+            const recentTransactions = transactions.slice(0, 5);
             let html = '';
-            activities.forEach(activity => {
+            
+            recentTransactions.forEach(transaction => {
                 const icons = {
                     deposit: 'fa-arrow-down text-success',
                     withdrawal: 'fa-arrow-up text-danger',
                     investment: 'fa-chart-line text-primary',
-                    profit: 'fa-dollar-sign text-success'
+                    profit: 'fa-dollar-sign text-success',
+                    admin_adjustment: 'fa-cog text-warning'
                 };
                 
-                const statusClass = activity.status === 'completed' ? 'badge-success' : 
-                                  activity.status === 'pending' ? 'badge-warning' : 'badge-primary';
+                const statusClass = transaction.status === 'approved' ? 'badge-success' : 
+                                  transaction.status === 'pending' ? 'badge-warning' : 'badge-danger';
                 
                 html += `
                     <div class="d-flex align-items-center mb-3">
                         <div class="flex-shrink-0">
-                            <i class="fas ${icons[activity.type]} fa-lg"></i>
+                            <i class="fas ${icons[transaction.type] || 'fa-exchange'} fa-lg"></i>
                         </div>
                         <div class="flex-grow-1 ms-3">
                             <div class="d-flex justify-content-between">
-                                <h6 class="mb-0">${activity.type.charAt(0).toUpperCase() + activity.type.slice(1)}</h6>
-                                <span class="fw-bold">${activity.amount}</span>
+                                <h6 class="mb-0">${transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)}</h6>
+                                <span class="fw-bold">$${transaction.amount}</span>
                             </div>
                             <div class="d-flex justify-content-between">
-                                <small class="text-muted">${activity.date}</small>
-                                <span class="badge ${statusClass}">${activity.status}</span>
+                                <small class="text-muted">${new Date(transaction.createdAt).toLocaleDateString()}</small>
+                                <span class="badge ${statusClass}">${transaction.status}</span>
                             </div>
                         </div>
                     </div>
                 `;
             });
             
-            $('#recentActivity').html(html);
+            $('#recentActivity').html(html || '<p class="text-muted">No recent activity</p>');
         }
 
         // Load investments
-        function loadInvestments() {
-            const investments = [
-                { plan: 'Basic Plan', amount: '$500.00', rate: '5%', start: '2023-10-15', end: '2023-11-15', status: 'Active' },
-                { plan: 'Premium Plan', amount: '$1,000.00', rate: '8%', start: '2023-09-20', end: '2023-10-20', status: 'Completed' },
-                { plan: 'VIP Plan', amount: '$2,000.00', rate: '12%', start: '2023-11-01', end: '2023-12-01', status: 'Active' }
-            ];
+        function loadInvestments(investments) {
+            if (!investments || !Array.isArray(investments)) {
+                $('#investmentsTable').html('<tr><td colspan="7" class="text-center text-muted">No active investments</td></tr>');
+                return;
+            }
+            
+            const activeInvestments = investments.filter(inv => inv.status === 'active');
+            
+            if (activeInvestments.length === 0) {
+                $('#investmentsTable').html('<tr><td colspan="7" class="text-center text-muted">No active investments</td></tr>');
+                return;
+            }
             
             let html = '';
-            investments.forEach(investment => {
-                const statusClass = investment.status === 'Active' ? 'badge-success' : 'badge-secondary';
+            activeInvestments.forEach(investment => {
+                const statusClass = investment.status === 'active' ? 'badge-success' : 'badge-secondary';
                 
                 html += `
                     <tr>
-                        <td>${investment.plan}</td>
-                        <td>${investment.amount}</td>
-                        <td>${investment.rate}</td>
-                        <td>${investment.start}</td>
-                        <td>${investment.end}</td>
+                        <td>${investment.planName}</td>
+                        <td>$${investment.amount}</td>
+                        <td>${investment.profitRate}%</td>
+                        <td>${new Date(investment.startDate).toLocaleDateString()}</td>
+                        <td>${investment.endDate ? new Date(investment.endDate).toLocaleDateString() : 'N/A'}</td>
                         <td><span class="badge ${statusClass}">${investment.status}</span></td>
                         <td>
-                            ${investment.status === 'Active' ? 
-                                '<button class="btn btn-sm btn-outline-primary">View</button>' : 
-                                '<button class="btn btn-sm btn-outline-secondary">Details</button>'}
+                            <button class="btn btn-sm btn-outline-primary">View</button>
                         </td>
                     </tr>
                 `;
@@ -1971,30 +2123,47 @@
         }
 
         // Load notifications
-        function loadNotifications() {
-            const notifications = [
-                { title: 'New Investment Opportunity', message: 'VIP Plan now offers 15% returns', time: '5 min ago', unread: true },
-                { title: 'Deposit Confirmed', message: 'Your deposit of $500 has been confirmed', time: '2 hours ago', unread: true },
-                { title: 'Weekly Report', message: 'Your weekly earnings report is ready', time: '1 day ago', unread: false }
-            ];
+        async function loadNotifications() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/user/notifications`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.success) {
+                        displayNotifications(result.data.notifications);
+                        $('#notificationCount').text(result.data.unreadCount || 0);
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading notifications:', error);
+            }
+        }
+
+        function displayNotifications(notifications) {
+            if (!notifications || !Array.isArray(notifications)) {
+                $('#notificationList').html('<p class="text-muted text-center">No notifications</p>');
+                return;
+            }
             
+            const recentNotifications = notifications.slice(0, 5);
             let html = '';
-            let unreadCount = 0;
             
-            notifications.forEach(notification => {
-                if (notification.unread) unreadCount++;
-                
+            recentNotifications.forEach(notification => {
                 html += `
-                    <div class="notification-item ${notification.unread ? 'unread' : ''}">
+                    <div class="notification-item ${!notification.isRead ? 'unread' : ''}">
                         <h6 class="mb-1">${notification.title}</h6>
-                        <p class="mb-1 small">${notification.message}</p>
-                        <small class="text-muted">${notification.time}</small>
+                        <p class="mb-1 small">${notification.content}</p>
+                        <small class="text-muted">${new Date(notification.createdAt).toLocaleDateString()}</small>
                     </div>
                 `;
             });
             
-            $('#notificationList').html(html);
-            $('#notificationCount').text(unreadCount);
+            $('#notificationList').html(html || '<p class="text-muted text-center">No notifications</p>');
         }
 
         // Initialize trading room
@@ -2085,8 +2254,10 @@
 
         // Update trading balance
         function updateTradingBalance() {
-            $('#tradingBalance').text('$10,000.00');
-            $('#freeMargin').text('$8,500.00');
+            if (currentUser) {
+                $('#tradingBalance').text(`$${(currentUser.walletBalance || 0).toFixed(2)}`);
+                $('#freeMargin').text(`$${(currentUser.walletBalance || 0).toFixed(2)}`);
+            }
         }
 
         // Simulate order book data
@@ -2350,7 +2521,7 @@
             const contractSize = 100000; // Standard lot size
             
             const marginRequired = (volume * contractSize * currentPrice) / leverage;
-            const balance = 10000; // Demo balance
+            const balance = currentUser ? currentUser.walletBalance : 10000;
             const riskPercentage = (marginRequired / balance) * 100;
             
             $('#riskLevel').css('width', Math.min(riskPercentage, 100) + '%');
@@ -2363,28 +2534,51 @@
         }
 
         // Submit deposit
-        function submitDeposit() {
+        async function submitDeposit() {
             const formData = new FormData($('#depositForm')[0]);
             const amount = formData.get('amount');
-            const method = formData.get('paymentMethod');
+            
+            if (!amount || amount <= 0) {
+                showToast('Please enter a valid deposit amount', 'danger');
+                return;
+            }
             
             showLoading(true);
             
-            // Simulate API call
-            setTimeout(() => {
-                $('#depositModal').modal('hide');
-                showToast(`Deposit request for $${amount} submitted successfully`, 'success');
+            try {
+                const response = await fetch(`${API_BASE_URL}/deposits`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: formData
+                });
+
+                const result = await response.json();
                 
-                // Reset form
-                $('#depositForm')[0].reset();
-                
+                if (result.success) {
+                    $('#depositModal').modal('hide');
+                    showToast(`Deposit request for $${amount} submitted successfully`, 'success');
+                    $('#depositForm')[0].reset();
+                    
+                    // Reload user data to update balances
+                    loadUserData();
+                } else {
+                    throw new Error(result.message || 'Deposit submission failed');
+                }
+            } catch (error) {
+                console.error('Deposit error:', error);
+                showToast(error.message || 'Deposit submission failed', 'danger');
+            } finally {
                 showLoading(false);
-            }, 1500);
+            }
         }
 
         // Show investment modal
         function showInvestmentModal() {
-            $('#availableDeposit').text('3,500.00');
+            if (currentUser) {
+                $('#availableDeposit').text((currentUser.depositBalance || 0).toFixed(2));
+            }
             $('#investmentModal').modal('show');
         }
 
@@ -2425,7 +2619,7 @@
         }
 
         // Submit investment
-        function submitInvestment() {
+        async function submitInvestment() {
             const amount = parseFloat($('#investmentAmount').val());
             const planId = $('#selectedPlanId').val();
             
@@ -2434,23 +2628,49 @@
                 return;
             }
             
+            if (!planId) {
+                showToast('Please select an investment plan', 'danger');
+                return;
+            }
+            
             showLoading(true);
             
-            // Simulate API call
-            setTimeout(() => {
-                $('#investmentModal').modal('hide');
-                showToast(`Investment of $${amount} submitted successfully`, 'success');
+            try {
+                const response = await fetch(`${API_BASE_URL}/investments`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        planId: planId,
+                        amount: amount
+                    })
+                });
+
+                const result = await response.json();
                 
-                // Reset form
-                $('#investmentForm')[0].reset();
-                $('.investment-plan').removeClass('selected');
-                $('#investButton').prop('disabled', true);
-                
+                if (result.success) {
+                    $('#investmentModal').modal('hide');
+                    showToast(`Investment of $${amount} submitted successfully`, 'success');
+                    
+                    // Reset form
+                    $('#investmentForm')[0].reset();
+                    $('.investment-plan').removeClass('selected');
+                    $('#investButton').prop('disabled', true);
+                    
+                    // Reload user data and investments
+                    loadUserData();
+                    loadDashboardData();
+                } else {
+                    throw new Error(result.message || 'Investment submission failed');
+                }
+            } catch (error) {
+                console.error('Investment error:', error);
+                showToast(error.message || 'Investment submission failed', 'danger');
+            } finally {
                 showLoading(false);
-                
-                // Reload investments
-                loadInvestments();
-            }, 1500);
+            }
         }
 
         // Show profile modal
@@ -2459,36 +2679,82 @@
         }
 
         // Update profile
-        function updateProfile() {
+        async function updateProfile() {
             const name = $('#profileName').val();
+            const bitcoinAccount = $('#profileBitcoin').val();
+            const tetherAccount = $('#profileTether').val();
+            const secretQuestion = $('#profileQuestion').val();
+            const secretAnswer = $('#profileAnswer').val();
             
             showLoading(true);
             
-            // Simulate API call
-            setTimeout(() => {
-                $('#profileModal').modal('hide');
-                showToast('Profile updated successfully', 'success');
+            try {
+                const response = await fetch(`${API_BASE_URL}/user/profile`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        bitcoinAccount: bitcoinAccount,
+                        tetherTRC20Account: tetherAccount,
+                        secretQuestion: secretQuestion,
+                        secretAnswer: secretAnswer
+                    })
+                });
+
+                const result = await response.json();
                 
-                // Update UI
-                $('#userName').text(name);
-                $('#userAvatar').text(name.substring(0, 2).toUpperCase());
-                
+                if (result.success) {
+                    $('#profileModal').modal('hide');
+                    showToast('Profile updated successfully', 'success');
+                    
+                    // Update UI
+                    $('#userName').text(name);
+                    $('#userAvatar').text(name.substring(0, 2).toUpperCase());
+                    currentUser.name = name;
+                } else {
+                    throw new Error(result.message || 'Profile update failed');
+                }
+            } catch (error) {
+                console.error('Profile update error:', error);
+                showToast(error.message || 'Profile update failed', 'danger');
+            } finally {
                 showLoading(false);
-            }, 1000);
+            }
         }
 
         // Show referrals modal
-        function showReferralsModal() {
-            $('#totalReferrals').text('3');
-            $('#referralCode').val('GALAXY123');
-            $('#referralLink').val('https://galaxydigital.com/register?ref=GALAXY123');
+        async function showReferralsModal() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/user/referrals`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.success) {
+                        $('#totalReferrals').text(result.data.totalReferrals);
+                        displayReferrals(result.data.referrals);
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading referrals:', error);
+            }
             
-            // Load referrals list
-            const referrals = [
-                { username: 'john_doe', email: 'john@example.com', joined: '2023-09-15', invested: '$1,500.00' },
-                { username: 'jane_smith', email: 'jane@example.com', joined: '2023-10-02', invested: '$2,000.00' },
-                { username: 'mike_wilson', email: 'mike@example.com', joined: '2023-10-20', invested: '$500.00' }
-            ];
+            $('#referralsModal').modal('show');
+        }
+
+        // Display referrals
+        function displayReferrals(referrals) {
+            if (!referrals || !Array.isArray(referrals)) {
+                $('#referralsList').html('<tr><td colspan="4" class="text-center text-muted">No referrals yet</td></tr>');
+                return;
+            }
             
             let html = '';
             referrals.forEach(ref => {
@@ -2496,14 +2762,13 @@
                     <tr>
                         <td>${ref.username}</td>
                         <td>${ref.email}</td>
-                        <td>${ref.joined}</td>
-                        <td>${ref.invested}</td>
+                        <td>${new Date(ref.createdAt).toLocaleDateString()}</td>
+                        <td>$${(ref.totalInvested || 0).toFixed(2)}</td>
                     </tr>
                 `;
             });
             
             $('#referralsList').html(html);
-            $('#referralsModal').modal('show');
         }
 
         // Copy referral code
@@ -2548,7 +2813,7 @@
         // Logout function
         function logout() {
             localStorage.removeItem('token');
-            window.location.href = 'register.html';
+            window.location.href = 'login.html';
         }
 
         // Simulate market data updates
@@ -2569,6 +2834,108 @@
 
         function clearDrawings() {
             showToast('All drawings cleared from chart', 'info');
+        }
+
+        // Load transactions section
+        async function loadTransactionsSection() {
+            showLoading(true);
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/user/transactions`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.success) {
+                        displayTransactionsSection(result.data);
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading transactions:', error);
+                showToast('Failed to load transactions', 'danger');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function displayTransactionsSection(transactions) {
+            if (!transactions || !Array.isArray(transactions)) {
+                $('#otherSections').html(`
+                    <div class="container-fluid py-4">
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="table-card">
+                                    <div class="card-header bg-transparent">
+                                        <h5 class="mb-0">Transaction History</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="text-muted text-center">No transactions found</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `);
+                return;
+            }
+            
+            let html = `
+                <div class="container-fluid py-4">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="table-card">
+                                <div class="card-header bg-transparent">
+                                    <h5 class="mb-0">Transaction History</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Date</th>
+                                                    <th>Type</th>
+                                                    <th>Amount</th>
+                                                    <th>Status</th>
+                                                    <th>Details</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+            `;
+            
+            transactions.forEach(transaction => {
+                const statusClass = transaction.status === 'approved' ? 'badge-success' : 
+                                  transaction.status === 'pending' ? 'badge-warning' : 'badge-danger';
+                
+                html += `
+                    <tr>
+                        <td>${new Date(transaction.createdAt).toLocaleDateString()}</td>
+                        <td>${transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)}</td>
+                        <td>$${transaction.amount}</td>
+                        <td><span class="badge ${statusClass}">${transaction.status}</span></td>
+                        <td>${transaction.adminNote || transaction.investmentPlan || 'N/A'}</td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            $('#otherSections').html(html);
+            $('#otherSections').show();
+            $('#dashboardSection, #tradingSection').hide();
+            $('#pageTitle').text('Transaction History');
         }
 
         // Load section content (placeholder)
