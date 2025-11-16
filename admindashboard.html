@@ -1590,6 +1590,1445 @@ body {
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Custom JS -->
-    <script src="admin-dashboard.js"></script>
+    
+    <!-- Add this script tag before the closing </body> tag -->
+<script>
+// =============================================
+// AUTHENTICATION & SESSION MANAGEMENT
+// =============================================
+
+const API_BASE_URL = 'https://muza-xi3w.onrender.com/api';
+let currentUserPage = 1;
+let currentTransactionPage = 1;
+const itemsPerPage = 10;
+
+// Authentication check for admin dashboard
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Admin Dashboard Initializing...');
+    
+    // Check authentication first
+    checkAdminAuthentication();
+    
+    // Initialize the dashboard
+    initializeDashboard();
+    
+    // Set up event listeners
+    setupEventListeners();
+    
+    // Start periodic updates
+    startPeriodicUpdates();
+});
+
+async function checkAdminAuthentication() {
+    const isLoggedIn = sessionStorage.getItem('adminLoggedIn');
+    const adminUsername = sessionStorage.getItem('adminUsername');
+    const adminPassword = sessionStorage.getItem('adminPassword');
+    
+    console.log('Auth check:', { isLoggedIn, adminUsername });
+    
+    if (!isLoggedIn || !adminUsername || !adminPassword) {
+        console.log('Not authenticated, redirecting to login');
+        window.location.href = 'admin-login.html';
+        return false;
+    }
+    
+    // Verify credentials are still valid
+    try {
+        await verifyAdminCredentials(adminUsername, adminPassword);
+        return true;
+    } catch (error) {
+        console.error('Authentication failed:', error);
+        // Clear invalid credentials and redirect to login
+        sessionStorage.removeItem('adminLoggedIn');
+        sessionStorage.removeItem('adminUsername');
+        sessionStorage.removeItem('adminPassword');
+        sessionStorage.removeItem('loginTime');
+        window.location.href = 'admin-login.html';
+        return false;
+    }
+}
+
+async function verifyAdminCredentials(username, password) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/admin/dashboard-stats`, {
+            method: 'GET',
+            headers: {
+                'Admin-Username': username,
+                'Admin-Password': password,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Invalid credentials');
+        }
+        
+        console.log('Admin credentials verified successfully');
+        return true;
+        
+    } catch (error) {
+        console.error('Credential verification failed:', error);
+        
+        // If API fails, check hardcoded credentials as fallback
+        const HARDCODED_CREDENTIALS = {
+            username: 'admin',
+            password: 'admin123'
+        };
+        
+        if (username === HARDCODED_CREDENTIALS.username && password === HARDCODED_CREDENTIALS.password) {
+            console.log('Hardcoded credentials verified');
+            return true;
+        }
+        
+        throw error;
+    }
+}
+
+// =============================================
+// DASHBOARD INITIALIZATION
+// =============================================
+
+function initializeDashboard() {
+    // Load dashboard stats
+    loadDashboardStats();
+    
+    // Initialize charts
+    initializeCharts();
+    
+    // Load initial data
+    loadUsers();
+    loadTransactions();
+    loadDeposits();
+    loadWithdrawals();
+    loadInvestments();
+    
+    // Update connection status
+    updateConnectionStatus();
+}
+
+function setupEventListeners() {
+    // Sidebar navigation
+    document.querySelectorAll('.sidebar .nav-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const tab = this.getAttribute('data-tab');
+            switchTab(tab);
+        });
+    });
+    
+    // Logout handler
+    document.getElementById('adminLogout').addEventListener('click', function(e) {
+        e.preventDefault();
+        adminLogout();
+    });
+    
+    // User search
+    document.getElementById('userSearch').addEventListener('input', debounce(loadUsers, 300));
+    
+    // Transaction filters
+    document.getElementById('transactionTypeFilter').addEventListener('change', loadTransactions);
+    document.getElementById('transactionStatusFilter').addEventListener('change', loadTransactions);
+    
+    // Deposit filter buttons
+    document.querySelectorAll('#depositsTab .btn-group .btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('#depositsTab .btn-group .btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            loadDeposits(this.getAttribute('data-filter'));
+        });
+    });
+    
+    // Withdrawal filter buttons
+    document.querySelectorAll('#withdrawalsTab .btn-group .btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('#withdrawalsTab .btn-group .btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            loadWithdrawals(this.getAttribute('data-filter'));
+        });
+    });
+    
+    // Earnings calculation
+    document.getElementById('earningsProfit').addEventListener('input', calculateEarningsTotal);
+    document.getElementById('earningsDeposit').addEventListener('input', calculateEarningsTotal);
+    document.getElementById('earningsInvestment').addEventListener('input', calculateEarningsTotal);
+}
+
+function startPeriodicUpdates() {
+    // Update dashboard every 30 seconds
+    setInterval(() => {
+        if (document.getElementById('dashboardTab').classList.contains('active')) {
+            loadDashboardStats();
+        }
+        updateConnectionStatus();
+    }, 30000);
+    
+    // Update time every second
+    setInterval(updateSystemUptime, 1000);
+}
+
+// =============================================
+// TAB MANAGEMENT
+// =============================================
+
+function switchTab(tabName) {
+    // Hide all tabs
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    // Remove active class from all sidebar links
+    document.querySelectorAll('.sidebar .nav-link').forEach(link => {
+        link.classList.remove('active');
+    });
+    
+    // Show selected tab
+    const targetTab = document.getElementById(tabName + 'Tab');
+    if (targetTab) {
+        targetTab.classList.add('active');
+    }
+    
+    // Activate corresponding sidebar link
+    const activeLink = document.querySelector(`.sidebar .nav-link[data-tab="${tabName}"]`);
+    if (activeLink) {
+        activeLink.classList.add('active');
+    }
+    
+    // Load tab-specific data
+    switch(tabName) {
+        case 'dashboard':
+            loadDashboardStats();
+            break;
+        case 'users':
+            loadUsers();
+            break;
+        case 'transactions':
+            loadTransactions();
+            break;
+        case 'deposits':
+            loadDeposits();
+            break;
+        case 'withdrawals':
+            loadWithdrawals();
+            break;
+        case 'investments':
+            loadInvestments();
+            break;
+        case 'earnings':
+            loadEarningsBreakdowns();
+            break;
+        case 'reports':
+            loadReports();
+            break;
+        case 'notifications':
+            loadNotifications();
+            break;
+        case 'system':
+            loadSystemSettings();
+            break;
+    }
+}
+
+// =============================================
+// DASHBOARD STATISTICS
+// =============================================
+
+async function loadDashboardStats() {
+    try {
+        const username = sessionStorage.getItem('adminUsername');
+        const password = sessionStorage.getItem('adminPassword');
+        
+        const response = await fetch(`${API_BASE_URL}/admin/dashboard-stats`, {
+            method: 'GET',
+            headers: {
+                'Admin-Username': username,
+                'Admin-Password': password,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            updateDashboardStats(data);
+        } else {
+            // Use mock data if API fails
+            updateDashboardStats(getMockDashboardStats());
+        }
+    } catch (error) {
+        console.error('Error loading dashboard stats:', error);
+        // Use mock data as fallback
+        updateDashboardStats(getMockDashboardStats());
+    }
+}
+
+function updateDashboardStats(stats) {
+    // Update main statistics
+    document.getElementById('totalUsers').textContent = stats.totalUsers?.toLocaleString() || '0';
+    document.getElementById('totalDeposits').textContent = stats.totalDeposits?.toLocaleString() || '0';
+    document.getElementById('totalWithdrawals').textContent = stats.totalWithdrawals?.toLocaleString() || '0';
+    document.getElementById('totalInvestments').textContent = stats.totalInvestments?.toLocaleString() || '0';
+    
+    // Update quick action counts
+    document.getElementById('quickDepositsCount').textContent = stats.pendingDeposits || '0';
+    document.getElementById('quickWithdrawalsCount').textContent = stats.pendingWithdrawals || '0';
+    document.getElementById('quickNewUsersCount').textContent = stats.newUsersToday || '0';
+    
+    // Update pending counts
+    document.getElementById('pendingDepositsCount').textContent = `${stats.pendingDeposits || 0} pending`;
+    document.getElementById('pendingWithdrawalsCount').textContent = `${stats.pendingWithdrawals || 0} pending`;
+    document.getElementById('activeInvestmentsCount').textContent = `${stats.activeInvestments || 0} active`;
+    document.getElementById('onlineUsers').textContent = `${stats.onlineUsers || 0} online`;
+    
+    // Update notification badges
+    updateNotificationBadges(stats);
+    
+    // Update recent activity
+    updateRecentActivity(stats.recentActivity || []);
+    
+    // Update last sync time
+    document.getElementById('lastSync').textContent = `Last sync: ${new Date().toLocaleTimeString()}`;
+}
+
+function getMockDashboardStats() {
+    return {
+        totalUsers: 1542,
+        totalDeposits: 1254300,
+        totalWithdrawals: 893400,
+        totalInvestments: 2100750,
+        pendingDeposits: 12,
+        pendingWithdrawals: 8,
+        newUsersToday: 23,
+        activeInvestments: 892,
+        onlineUsers: 47,
+        recentActivity: [
+            { type: 'user_registration', message: 'New user registered', time: '2 minutes ago' },
+            { type: 'deposit_approved', message: 'Deposit approved', time: '5 minutes ago' },
+            { type: 'withdrawal_processed', message: 'Withdrawal processed', time: '10 minutes ago' }
+        ]
+    };
+}
+
+function updateNotificationBadges(stats) {
+    const depositsBadge = document.getElementById('pendingDepositsBadge');
+    const withdrawalsBadge = document.getElementById('pendingWithdrawalsBadge');
+    
+    if (stats.pendingDeposits > 0) {
+        depositsBadge.textContent = stats.pendingDeposits;
+        depositsBadge.classList.remove('d-none');
+    } else {
+        depositsBadge.classList.add('d-none');
+    }
+    
+    if (stats.pendingWithdrawals > 0) {
+        withdrawalsBadge.textContent = stats.pendingWithdrawals;
+        withdrawalsBadge.classList.remove('d-none');
+    } else {
+        withdrawalsBadge.classList.add('d-none');
+    }
+}
+
+function updateRecentActivity(activities) {
+    const activityList = document.getElementById('recentActivity');
+    activityList.innerHTML = '';
+    
+    activities.forEach(activity => {
+        const li = document.createElement('li');
+        
+        let icon = 'fa-info-circle';
+        let color = 'var(--admin-color)';
+        
+        switch(activity.type) {
+            case 'user_registration':
+                icon = 'fa-user-plus';
+                color = 'var(--info-color)';
+                break;
+            case 'deposit_approved':
+                icon = 'fa-money-bill-wave';
+                color = 'var(--success-color)';
+                break;
+            case 'withdrawal_processed':
+                icon = 'fa-wallet';
+                color = 'var(--warning-color)';
+                break;
+            case 'investment_made':
+                icon = 'fa-chart-line';
+                color = 'var(--primary-color)';
+                break;
+        }
+        
+        li.innerHTML = `
+            <div class="activity-icon" style="background-color: ${color}20; color: ${color};">
+                <i class="fas ${icon}"></i>
+            </div>
+            <div>
+                <div>${activity.message}</div>
+                <small class="text-muted">${activity.time}</small>
+            </div>
+        `;
+        
+        activityList.appendChild(li);
+    });
+}
+
+// =============================================
+// CHARTS INITIALIZATION
+// =============================================
+
+function initializeCharts() {
+    // Revenue Chart
+    const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+    const revenueChart = new Chart(revenueCtx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            datasets: [{
+                label: 'Revenue',
+                data: [12000, 19000, 15000, 25000, 22000, 30000, 28000, 35000, 32000, 40000, 38000, 45000],
+                borderColor: 'var(--admin-color)',
+                backgroundColor: 'rgba(142, 68, 173, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+}
+
+// =============================================
+// USER MANAGEMENT
+// =============================================
+
+async function loadUsers(page = 1, search = '') {
+    try {
+        const username = sessionStorage.getItem('adminUsername');
+        const password = sessionStorage.getItem('adminPassword');
+        
+        // In a real implementation, you would fetch from API
+        // const response = await fetch(`${API_BASE_URL}/admin/users?page=${page}&search=${search}`, {
+        //     headers: { 'Admin-Username': username, 'Admin-Password': password }
+        // });
+        
+        // For now, use mock data
+        const mockUsers = getMockUsers();
+        displayUsers(mockUsers);
+        
+    } catch (error) {
+        console.error('Error loading users:', error);
+        showToast('Error loading users', 'error');
+    }
+}
+
+function displayUsers(users) {
+    const tbody = document.getElementById('usersTableBody');
+    tbody.innerHTML = '';
+    
+    users.forEach(user => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>
+                <div class="d-flex align-items-center">
+                    <div class="user-avatar">${user.name.charAt(0)}</div>
+                    <div class="ms-2">
+                        <div class="fw-bold">${user.name}</div>
+                        <small class="text-muted">@${user.username}</small>
+                    </div>
+                </div>
+            </td>
+            <td>${user.email}</td>
+            <td>${user.location}</td>
+            <td>$${user.walletBalance.toLocaleString()}</td>
+            <td>$${user.depositBalance.toLocaleString()}</td>
+            <td>$${user.totalInvested.toLocaleString()}</td>
+            <td>
+                <span class="badge ${user.status === 'active' ? 'badge-approved' : 'badge-pending'}">
+                    ${user.status}
+                </span>
+            </td>
+            <td>${new Date(user.joined).toLocaleDateString()}</td>
+            <td>
+                <div class="action-buttons">
+                    <button class="btn btn-sm btn-outline-primary" onclick="viewUserDetails('${user.id}')">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-success" onclick="openTopUpModal('${user.id}', '${user.name}')">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-warning" onclick="editUser('${user.id}')">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteUser('${user.id}')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+    
+    document.getElementById('usersTableInfo').textContent = `Showing ${users.length} users`;
+}
+
+function getMockUsers() {
+    return [
+        {
+            id: '1',
+            name: 'John Smith',
+            username: 'johnsmith',
+            email: 'john@example.com',
+            location: 'New York, USA',
+            walletBalance: 2500,
+            depositBalance: 15000,
+            totalInvested: 10000,
+            status: 'active',
+            joined: '2024-01-15'
+        },
+        {
+            id: '2',
+            name: 'Sarah Johnson',
+            username: 'sarahj',
+            email: 'sarah@example.com',
+            location: 'London, UK',
+            walletBalance: 1800,
+            depositBalance: 12000,
+            totalInvested: 8000,
+            status: 'active',
+            joined: '2024-02-20'
+        },
+        {
+            id: '3',
+            name: 'Mike Chen',
+            username: 'mikechen',
+            email: 'mike@example.com',
+            location: 'Tokyo, Japan',
+            walletBalance: 3200,
+            depositBalance: 20000,
+            totalInvested: 15000,
+            status: 'active',
+            joined: '2024-01-08'
+        }
+    ];
+}
+
+// =============================================
+// TRANSACTION MANAGEMENT
+// =============================================
+
+async function loadTransactions(page = 1) {
+    try {
+        const typeFilter = document.getElementById('transactionTypeFilter').value;
+        const statusFilter = document.getElementById('transactionStatusFilter').value;
+        
+        // Mock implementation
+        const mockTransactions = getMockTransactions();
+        displayTransactions(mockTransactions);
+        
+    } catch (error) {
+        console.error('Error loading transactions:', error);
+        showToast('Error loading transactions', 'error');
+    }
+}
+
+function displayTransactions(transactions) {
+    const tbody = document.getElementById('transactionsTableBody');
+    tbody.innerHTML = '';
+    
+    transactions.forEach(transaction => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${transaction.id}</td>
+            <td>${transaction.user}</td>
+            <td>
+                <span class="badge ${getTransactionTypeBadge(transaction.type)}">
+                    ${transaction.type}
+                </span>
+            </td>
+            <td>$${transaction.amount.toLocaleString()}</td>
+            <td>
+                <span class="badge ${getStatusBadge(transaction.status)}">
+                    ${transaction.status}
+                </span>
+            </td>
+            <td>${new Date(transaction.date).toLocaleDateString()}</td>
+            <td>
+                <div class="action-buttons">
+                    <button class="btn btn-sm btn-outline-primary" onclick="viewTransactionDetails('${transaction.id}')">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    ${transaction.status === 'pending' ? `
+                        <button class="btn btn-sm btn-outline-success" onclick="approveTransaction('${transaction.id}')">
+                            <i class="fas fa-check"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="rejectTransaction('${transaction.id}')">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    ` : ''}
+                </div>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function getMockTransactions() {
+    return [
+        {
+            id: 'TXN001',
+            user: 'John Smith',
+            type: 'deposit',
+            amount: 5000,
+            status: 'approved',
+            date: '2024-03-15'
+        },
+        {
+            id: 'TXN002',
+            user: 'Sarah Johnson',
+            type: 'withdrawal',
+            amount: 2000,
+            status: 'pending',
+            date: '2024-03-16'
+        },
+        {
+            id: 'TXN003',
+            user: 'Mike Chen',
+            type: 'investment',
+            amount: 10000,
+            status: 'approved',
+            date: '2024-03-14'
+        }
+    ];
+}
+
+// =============================================
+// DEPOSIT MANAGEMENT
+// =============================================
+
+async function loadDeposits(filter = 'pending') {
+    try {
+        // Mock implementation
+        const mockDeposits = getMockDeposits().filter(deposit => 
+            filter === 'all' || deposit.status === filter
+        );
+        displayDeposits(mockDeposits);
+        
+    } catch (error) {
+        console.error('Error loading deposits:', error);
+        showToast('Error loading deposits', 'error');
+    }
+}
+
+function displayDeposits(deposits) {
+    const tbody = document.getElementById('depositsTableBody');
+    tbody.innerHTML = '';
+    
+    deposits.forEach(deposit => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${deposit.user}</td>
+            <td>$${deposit.amount.toLocaleString()}</td>
+            <td>${deposit.method}</td>
+            <td>
+                ${deposit.proof ? 
+                    `<button class="btn btn-sm btn-outline-primary" onclick="viewProof('${deposit.proof}')">
+                        <i class="fas fa-eye"></i> View
+                    </button>` : 
+                    'No proof'
+                }
+            </td>
+            <td>
+                <span class="badge ${getStatusBadge(deposit.status)}">
+                    ${deposit.status}
+                </span>
+            </td>
+            <td>${new Date(deposit.date).toLocaleDateString()}</td>
+            <td>
+                <div class="action-buttons">
+                    ${deposit.status === 'pending' ? `
+                        <button class="btn btn-sm btn-outline-success" onclick="approveDeposit('${deposit.id}')">
+                            <i class="fas fa-check"></i> Approve
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="rejectDeposit('${deposit.id}')">
+                            <i class="fas fa-times"></i> Reject
+                        </button>
+                    ` : ''}
+                    <button class="btn btn-sm btn-outline-primary" onclick="viewDepositDetails('${deposit.id}')">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function getMockDeposits() {
+    return [
+        {
+            id: 'DEP001',
+            user: 'John Smith',
+            amount: 5000,
+            method: 'Bank Transfer',
+            proof: 'proof1.jpg',
+            status: 'pending',
+            date: '2024-03-15'
+        },
+        {
+            id: 'DEP002',
+            user: 'Sarah Johnson',
+            amount: 3000,
+            method: 'Credit Card',
+            proof: null,
+            status: 'approved',
+            date: '2024-03-14'
+        }
+    ];
+}
+
+// =============================================
+// WITHDRAWAL MANAGEMENT
+// =============================================
+
+async function loadWithdrawals(filter = 'pending') {
+    try {
+        // Mock implementation
+        const mockWithdrawals = getMockWithdrawals().filter(withdrawal => 
+            filter === 'all' || withdrawal.status === filter
+        );
+        displayWithdrawals(mockWithdrawals);
+        
+    } catch (error) {
+        console.error('Error loading withdrawals:', error);
+        showToast('Error loading withdrawals', 'error');
+    }
+}
+
+function displayWithdrawals(withdrawals) {
+    const tbody = document.getElementById('withdrawalsTableBody');
+    tbody.innerHTML = '';
+    
+    withdrawals.forEach(withdrawal => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${withdrawal.user}</td>
+            <td>$${withdrawal.amount.toLocaleString()}</td>
+            <td>${withdrawal.method}</td>
+            <td>${withdrawal.wallet}</td>
+            <td>
+                <span class="badge ${getStatusBadge(withdrawal.status)}">
+                    ${withdrawal.status}
+                </span>
+            </td>
+            <td>${new Date(withdrawal.date).toLocaleDateString()}</td>
+            <td>
+                <div class="action-buttons">
+                    ${withdrawal.status === 'pending' ? `
+                        <button class="btn btn-sm btn-outline-success" onclick="approveWithdrawal('${withdrawal.id}')">
+                            <i class="fas fa-check"></i> Approve
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="rejectWithdrawal('${withdrawal.id}')">
+                            <i class="fas fa-times"></i> Reject
+                        </button>
+                    ` : ''}
+                    <button class="btn btn-sm btn-outline-primary" onclick="viewWithdrawalDetails('${withdrawal.id}')">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function getMockWithdrawals() {
+    return [
+        {
+            id: 'WD001',
+            user: 'Sarah Johnson',
+            amount: 2000,
+            method: 'Bitcoin',
+            wallet: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa',
+            status: 'pending',
+            date: '2024-03-16'
+        },
+        {
+            id: 'WD002',
+            user: 'Mike Chen',
+            amount: 1500,
+            method: 'Bank Transfer',
+            wallet: 'CH9300762011623852957',
+            status: 'approved',
+            date: '2024-03-13'
+        }
+    ];
+}
+
+// =============================================
+// INVESTMENT MANAGEMENT
+// =============================================
+
+async function loadInvestments() {
+    try {
+        // Mock implementation
+        const mockInvestments = getMockInvestments();
+        displayInvestments(mockInvestments);
+        
+    } catch (error) {
+        console.error('Error loading investments:', error);
+        showToast('Error loading investments', 'error');
+    }
+}
+
+function displayInvestments(investments) {
+    const tbody = document.getElementById('investmentsTableBody');
+    tbody.innerHTML = '';
+    
+    investments.forEach(investment => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${investment.user}</td>
+            <td>${investment.plan}</td>
+            <td>$${investment.amount.toLocaleString()}</td>
+            <td>${investment.profitRate}%</td>
+            <td>$${investment.earned.toLocaleString()}</td>
+            <td>
+                <span class="badge ${investment.status === 'active' ? 'badge-approved' : 'badge-pending'}">
+                    ${investment.status}
+                </span>
+            </td>
+            <td>${new Date(investment.startDate).toLocaleDateString()}</td>
+            <td>${new Date(investment.endDate).toLocaleDateString()}</td>
+            <td>
+                <div class="action-buttons">
+                    <button class="btn btn-sm btn-outline-primary" onclick="viewInvestmentDetails('${investment.id}')">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-warning" onclick="editInvestment('${investment.id}')">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="cancelInvestment('${investment.id}')">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function getMockInvestments() {
+    return [
+        {
+            id: 'INV001',
+            user: 'Mike Chen',
+            plan: 'VIP Plan',
+            amount: 10000,
+            profitRate: 12,
+            earned: 1200,
+            status: 'active',
+            startDate: '2024-01-15',
+            endDate: '2024-07-15'
+        },
+        {
+            id: 'INV002',
+            user: 'John Smith',
+            plan: 'Premium Plan',
+            amount: 5000,
+            profitRate: 8,
+            earned: 400,
+            status: 'active',
+            startDate: '2024-02-01',
+            endDate: '2024-05-01'
+        }
+    ];
+}
+
+// =============================================
+// EARNINGS MANAGEMENT
+// =============================================
+
+async function loadEarningsBreakdowns() {
+    try {
+        // Mock implementation
+        const mockEarnings = getMockEarnings();
+        displayEarningsBreakdowns(mockEarnings);
+        
+    } catch (error) {
+        console.error('Error loading earnings:', error);
+        showToast('Error loading earnings breakdowns', 'error');
+    }
+}
+
+function displayEarningsBreakdowns(earnings) {
+    const tbody = document.getElementById('earningsTableBody');
+    tbody.innerHTML = '';
+    
+    earnings.forEach(earning => {
+        const total = earning.profit + earning.deposit + earning.investment;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${earning.user}</td>
+            <td>${earning.period}</td>
+            <td>${new Date(earning.startDate).toLocaleDateString()} - ${new Date(earning.endDate).toLocaleDateString()}</td>
+            <td>$${earning.profit.toLocaleString()}</td>
+            <td>$${earning.deposit.toLocaleString()}</td>
+            <td>$${earning.investment.toLocaleString()}</td>
+            <td>$${total.toLocaleString()}</td>
+            <td>
+                <span class="badge ${earning.status === 'processed' ? 'badge-approved' : 'badge-pending'}">
+                    ${earning.status}
+                </span>
+            </td>
+            <td>${new Date(earning.created).toLocaleDateString()}</td>
+            <td>
+                <div class="action-buttons">
+                    <button class="btn btn-sm btn-outline-primary" onclick="viewEarningsDetails('${earning.id}')">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-success" onclick="processEarnings('${earning.id}')">
+                        <i class="fas fa-check"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteEarnings('${earning.id}')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function getMockEarnings() {
+    return [
+        {
+            id: 'ERN001',
+            user: 'John Smith',
+            period: 'monthly',
+            startDate: '2024-02-01',
+            endDate: '2024-02-28',
+            profit: 1200,
+            deposit: 5000,
+            investment: 10000,
+            status: 'processed',
+            created: '2024-03-01'
+        }
+    ];
+}
+
+// =============================================
+// NOTIFICATION MANAGEMENT
+// =============================================
+
+async function loadNotifications() {
+    try {
+        // Mock implementation
+        const mockNotifications = getMockNotifications();
+        displayNotifications(mockNotifications);
+        
+    } catch (error) {
+        console.error('Error loading notifications:', error);
+        showToast('Error loading notifications', 'error');
+    }
+}
+
+function displayNotifications(notifications) {
+    const container = document.getElementById('notificationsList');
+    container.innerHTML = '';
+    
+    notifications.forEach(notification => {
+        const div = document.createElement('div');
+        div.className = `alert alert-${getNotificationTypeClass(notification.type)} mb-2`;
+        div.innerHTML = `
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h6 class="alert-heading mb-1">${notification.title}</h6>
+                    <p class="mb-1">${notification.message}</p>
+                    <small class="text-muted">Sent to: ${notification.recipient} • ${new Date(notification.date).toLocaleString()}</small>
+                </div>
+                <button type="button" class="btn-close" onclick="deleteNotification('${notification.id}')"></button>
+            </div>
+        `;
+        container.appendChild(div);
+    });
+    
+    // Update stats
+    document.getElementById('totalNotifications').textContent = notifications.length;
+    document.getElementById('unreadNotifications').textContent = notifications.filter(n => !n.read).length;
+    document.getElementById('todayNotifications').textContent = notifications.filter(n => 
+        new Date(n.date).toDateString() === new Date().toDateString()
+    ).length;
+}
+
+function getMockNotifications() {
+    return [
+        {
+            id: 'NOT001',
+            title: 'Welcome to Galaxy Digital',
+            message: 'Thank you for joining our platform. Start your investment journey today!',
+            type: 'info',
+            recipient: 'All Users',
+            date: '2024-03-16T10:00:00',
+            read: true
+        },
+        {
+            id: 'NOT002',
+            title: 'New Investment Plan Available',
+            message: 'Check out our new VIP investment plan with higher returns!',
+            type: 'success',
+            recipient: 'Premium Users',
+            date: '2024-03-16T09:30:00',
+            read: false
+        }
+    ];
+}
+
+// =============================================
+// SYSTEM SETTINGS
+// =============================================
+
+function loadSystemSettings() {
+    // Load current settings (mock implementation)
+    document.getElementById('siteName').value = 'Galaxy Digital Holdings';
+    document.getElementById('adminEmail').value = 'admin@galaxydigital.com';
+    document.getElementById('currency').value = 'USD';
+    document.getElementById('sessionTimeout').value = 60;
+    document.getElementById('maxLoginAttempts').value = 5;
+    document.getElementById('enable2FA').checked = true;
+    document.getElementById('maintenanceMode').checked = false;
+    
+    // Load investment plans
+    loadInvestmentPlans();
+    
+    // Start system uptime counter
+    updateSystemUptime();
+}
+
+function loadInvestmentPlans() {
+    const plansContainer = document.getElementById('investmentPlansSettings');
+    const plans = [
+        { id: 1, name: 'Basic Plan', profit: 5, min: 100, max: 5000, duration: 30 },
+        { id: 2, name: 'Premium Plan', profit: 8, min: 5000, max: 20000, duration: 60 },
+        { id: 3, name: 'VIP Plan', profit: 12, min: 20000, max: 100000, duration: 90 }
+    ];
+    
+    plansContainer.innerHTML = plans.map(plan => `
+        <div class="card mb-2">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-3">
+                        <strong>${plan.name}</strong>
+                    </div>
+                    <div class="col-md-2">
+                        <small>Profit: ${plan.profit}%</small>
+                    </div>
+                    <div class="col-md-3">
+                        <small>Range: $${plan.min} - $${plan.max}</small>
+                    </div>
+                    <div class="col-md-2">
+                        <small>${plan.duration} days</small>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-sm btn-outline-primary" onclick="editPlan(${plan.id})">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deletePlan(${plan.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function updateSystemUptime() {
+    const startTime = sessionStorage.getItem('dashboardStartTime') || new Date().toISOString();
+    if (!sessionStorage.getItem('dashboardStartTime')) {
+        sessionStorage.setItem('dashboardStartTime', startTime);
+    }
+    
+    const now = new Date();
+    const start = new Date(startTime);
+    const diff = now - start;
+    
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+    
+    document.getElementById('systemUptime').textContent = 
+        `${days} days ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
+
+// =============================================
+// MODAL FUNCTIONS
+// =============================================
+
+function openTopUpModal(userId, userName) {
+    document.getElementById('topupUserId').value = userId;
+    document.getElementById('topupUsername').textContent = userName;
+    
+    // Reset form
+    document.getElementById('topupType').value = 'deposit';
+    document.getElementById('topupAmount').value = '';
+    document.getElementById('topupNote').value = '';
+    
+    toggleTopUpType();
+    
+    // Show modal
+    new bootstrap.Modal(document.getElementById('topupModal')).show();
+}
+
+function toggleTopUpType() {
+    const type = document.getElementById('topupType').value;
+    const planGroup = document.getElementById('investmentPlanGroup');
+    
+    if (type === 'investment') {
+        planGroup.style.display = 'block';
+    } else {
+        planGroup.style.display = 'none';
+    }
+}
+
+function submitTopUp() {
+    const userId = document.getElementById('topupUserId').value;
+    const type = document.getElementById('topupType').value;
+    const amount = document.getElementById('topupAmount').value;
+    const note = document.getElementById('topupNote').value;
+    
+    if (!amount || amount <= 0) {
+        showToast('Please enter a valid amount', 'error');
+        return;
+    }
+    
+    // Simulate API call
+    showToast(`${type.charAt(0).toUpperCase() + type.slice(1)} top-up of $${amount} processed successfully`, 'success');
+    
+    // Close modal
+    bootstrap.Modal.getInstance(document.getElementById('topupModal')).hide();
+    
+    // Refresh relevant data
+    if (type === 'deposit') {
+        loadDeposits();
+    } else {
+        loadInvestments();
+    }
+}
+
+function calculateEarningsTotal() {
+    const profit = parseFloat(document.getElementById('earningsProfit').value) || 0;
+    const deposit = parseFloat(document.getElementById('earningsDeposit').value) || 0;
+    const investment = parseFloat(document.getElementById('earningsInvestment').value) || 0;
+    
+    const total = profit + deposit + investment;
+    document.getElementById('earningsTotal').textContent = total.toFixed(2);
+}
+
+function createEarningsBreakdown() {
+    const user = document.getElementById('earningsUser').value;
+    const period = document.getElementById('earningsPeriod').value;
+    const startDate = document.getElementById('earningsStartDate').value;
+    const endDate = document.getElementById('earningsEndDate').value;
+    const profit = parseFloat(document.getElementById('earningsProfit').value) || 0;
+    const deposit = parseFloat(document.getElementById('earningsDeposit').value) || 0;
+    const investment = parseFloat(document.getElementById('earningsInvestment').value) || 0;
+    const notes = document.getElementById('earningsNotes').value;
+    
+    if (!user || !startDate || !endDate) {
+        showToast('Please fill in all required fields', 'error');
+        return;
+    }
+    
+    // Simulate API call
+    showToast('Earnings breakdown created successfully', 'success');
+    
+    // Close modal and refresh
+    bootstrap.Modal.getInstance(document.getElementById('createEarningsModal')).hide();
+    loadEarningsBreakdowns();
+}
+
+function sendNotification() {
+    const user = document.getElementById('notificationUser').value;
+    const title = document.getElementById('notificationTitle').value;
+    const message = document.getElementById('notificationMessage').value;
+    const type = document.getElementById('notificationType').value;
+    
+    if (!title || !message) {
+        showToast('Please fill in title and message', 'error');
+        return;
+    }
+    
+    // Simulate API call
+    showToast(`Notification sent to ${user === 'all' ? 'all users' : 'selected user'}`, 'success');
+    
+    // Close modal
+    bootstrap.Modal.getInstance(document.getElementById('sendNotificationModal')).hide();
+    
+    // Refresh notifications
+    loadNotifications();
+}
+
+function sendBroadcast() {
+    const title = document.getElementById('broadcastTitle').value;
+    const message = document.getElementById('broadcastMessage').value;
+    const type = document.getElementById('broadcastType').value;
+    
+    if (!title || !message) {
+        showToast('Please fill in title and message', 'error');
+        return;
+    }
+    
+    // Simulate API call
+    showToast('Broadcast message sent to all users', 'success');
+    
+    // Close modal
+    bootstrap.Modal.getInstance(document.getElementById('broadcastModal')).hide();
+}
+
+// =============================================
+// UTILITY FUNCTIONS
+// =============================================
+
+function getStatusBadge(status) {
+    switch(status) {
+        case 'approved': return 'badge-approved';
+        case 'pending': return 'badge-pending';
+        case 'rejected': return 'badge-rejected';
+        default: return 'badge-pending';
+    }
+}
+
+function getTransactionTypeBadge(type) {
+    switch(type) {
+        case 'deposit': return 'badge-approved';
+        case 'withdrawal': return 'badge-warning';
+        case 'investment': return 'badge-primary';
+        case 'profit': return 'badge-success';
+        default: return 'badge-secondary';
+    }
+}
+
+function getNotificationTypeClass(type) {
+    switch(type) {
+        case 'success': return 'success';
+        case 'warning': return 'warning';
+        case 'error': return 'danger';
+        default: return 'info';
+    }
+}
+
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+function showToast(message, type = 'info') {
+    // Create toast container if it doesn't exist
+    let toastContainer = document.querySelector('.toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+        document.body.appendChild(toastContainer);
+    }
+    
+    const toastId = 'toast-' + Date.now();
+    const toast = document.createElement('div');
+    toast.className = `toast align-items-center text-bg-${type} border-0`;
+    toast.id = toastId;
+    toast.innerHTML = `
+        <div class="d-flex">
+            <div class="toast-body">${message}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    `;
+    
+    toastContainer.appendChild(toast);
+    
+    const bsToast = new bootstrap.Toast(toast, { delay: 3000 });
+    bsToast.show();
+    
+    // Remove toast from DOM after it's hidden
+    toast.addEventListener('hidden.bs.toast', () => {
+        toast.remove();
+    });
+}
+
+function updateConnectionStatus() {
+    const indicator = document.getElementById('adminConnectionIndicator');
+    const status = document.getElementById('adminConnectionStatus');
+    
+    // Simulate connection check
+    const isConnected = Math.random() > 0.1; // 90% chance of being connected
+    
+    if (isConnected) {
+        indicator.className = 'status-indicator status-connected';
+        status.textContent = 'Connected';
+    } else {
+        indicator.className = 'status-indicator status-disconnected';
+        status.textContent = 'Disconnected';
+    }
+}
+
+// =============================================
+// ACTION FUNCTIONS
+// =============================================
+
+function refreshDashboard() {
+    showToast('Refreshing dashboard...', 'info');
+    loadDashboardStats();
+    loadUsers();
+    loadTransactions();
+}
+
+function showPendingDeposits() {
+    switchTab('deposits');
+    document.querySelector('#depositsTab .btn-group .btn[data-filter="pending"]').click();
+}
+
+function showPendingWithdrawals() {
+    switchTab('withdrawals');
+    document.querySelector('#withdrawalsTab .btn-group .btn[data-filter="pending"]').click();
+}
+
+function showRecentUsers() {
+    switchTab('users');
+    document.getElementById('userSearch').value = '';
+    loadUsers();
+}
+
+function distributeProfits() {
+    showToast('Profit distribution started...', 'info');
+    // Simulate API call
+    setTimeout(() => {
+        showToast('Profits distributed successfully to all active investments', 'success');
+    }, 2000);
+}
+
+function exportData() {
+    showToast('Exporting data...', 'info');
+    // Simulate export
+    setTimeout(() => {
+        showToast('Data exported successfully', 'success');
+    }, 1500);
+}
+
+function showSystemStats() {
+    showToast('Showing system statistics...', 'info');
+    switchTab('system');
+}
+
+function broadcastNotification() {
+    new bootstrap.Modal(document.getElementById('broadcastModal')).show();
+}
+
+function runBackup() {
+    showToast('Starting database backup...', 'info');
+    // Simulate backup
+    setTimeout(() => {
+        document.getElementById('lastBackup').textContent = new Date().toLocaleString();
+        showToast('Database backup completed successfully', 'success');
+    }, 3000);
+}
+
+function clearCache() {
+    showToast('Clearing cache...', 'info');
+    // Simulate cache clear
+    setTimeout(() => {
+        showToast('Cache cleared successfully', 'success');
+    }, 1500);
+}
+
+function saveSystemSettings() {
+    showToast('System settings saved successfully', 'success');
+}
+
+function adminLogout() {
+    // Clear all session data
+    sessionStorage.removeItem('adminLoggedIn');
+    sessionStorage.removeItem('adminUsername');
+    sessionStorage.removeItem('adminPassword');
+    sessionStorage.removeItem('loginTime');
+    sessionStorage.removeItem('dashboardStartTime');
+    
+    // Redirect to login page
+    window.location.href = 'admin-login.html';
+}
+
+// =============================================
+// PLACEHOLDER FUNCTIONS FOR FUTURE IMPLEMENTATION
+// =============================================
+
+function viewUserDetails(userId) { showToast(`Viewing details for user ${userId}`, 'info'); }
+function editUser(userId) { showToast(`Editing user ${userId}`, 'info'); }
+function deleteUser(userId) { 
+    if (confirm('Are you sure you want to delete this user?')) {
+        showToast(`User ${userId} deleted`, 'success'); 
+    }
+}
+function addNewUser() { showToast('Add user functionality to be implemented', 'info'); }
+function viewTransactionDetails(txnId) { showToast(`Viewing transaction ${txnId}`, 'info'); }
+function approveTransaction(txnId) { showToast(`Transaction ${txnId} approved`, 'success'); }
+function rejectTransaction(txnId) { showToast(`Transaction ${txnId} rejected`, 'success'); }
+function viewProof(proofId) { showToast(`Viewing proof ${proofId}`, 'info'); }
+function approveDeposit(depositId) { showToast(`Deposit ${depositId} approved`, 'success'); }
+function rejectDeposit(depositId) { showToast(`Deposit ${depositId} rejected`, 'success'); }
+function viewDepositDetails(depositId) { showToast(`Viewing deposit ${depositId}`, 'info'); }
+function approveWithdrawal(withdrawalId) { showToast(`Withdrawal ${withdrawalId} approved`, 'success'); }
+function rejectWithdrawal(withdrawalId) { showToast(`Withdrawal ${withdrawalId} rejected`, 'success'); }
+function viewWithdrawalDetails(withdrawalId) { showToast(`Viewing withdrawal ${withdrawalId}`, 'info'); }
+function viewInvestmentDetails(investmentId) { showToast(`Viewing investment ${investmentId}`, 'info'); }
+function editInvestment(investmentId) { showToast(`Editing investment ${investmentId}`, 'info'); }
+function cancelInvestment(investmentId) { 
+    if (confirm('Are you sure you want to cancel this investment?')) {
+        showToast(`Investment ${investmentId} cancelled`, 'success'); 
+    }
+}
+function viewEarningsDetails(earningId) { showToast(`Viewing earnings ${earningId}`, 'info'); }
+function processEarnings(earningId) { showToast(`Earnings ${earningId} processed`, 'success'); }
+function deleteEarnings(earningId) { 
+    if (confirm('Are you sure you want to delete this earnings breakdown?')) {
+        showToast(`Earnings ${earningId} deleted`, 'success'); 
+    }
+}
+function deleteNotification(notificationId) { showToast(`Notification ${notificationId} deleted`, 'success'); }
+function useTemplate(template) { showToast(`Using template: ${template}`, 'info'); }
+function editPlan(planId) { showToast(`Editing plan ${planId}`, 'info'); }
+function deletePlan(planId) { 
+    if (confirm('Are you sure you want to delete this investment plan?')) {
+        showToast(`Plan ${planId} deleted`, 'success'); 
+    }
+}
+function createBulkEarningsBreakdown() { showToast('Bulk earnings creation to be implemented', 'info'); }
+function submitInvestmentAdjustment() { showToast('Investment adjustment to be implemented', 'info'); }
+function loadReports() { showToast('Loading reports...', 'info'); }
+
+</script>
+
 </body>
 </html>

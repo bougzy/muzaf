@@ -2856,3 +2856,37 @@ function addNewUser() {
     showToast('User Added', 'New user has been created successfully', 'success');
     bootstrap.Modal.getInstance(document.getElementById('addUserModal')).hide();
 }
+
+
+
+// Check session timeout periodically
+setInterval(function() {
+    const loginTime = sessionStorage.getItem('loginTime');
+    if (loginTime) {
+        const loginDate = new Date(loginTime);
+        const now = new Date();
+        const diffHours = (now - loginDate) / (1000 * 60 * 60);
+        
+        // Logout after 8 hours (or your preferred timeout)
+        if (diffHours > 8) {
+            sessionStorage.clear();
+            window.location.href = 'admin-login.html';
+        }
+    }
+}, 60000); // Check every minute
+
+
+
+// Add this to your admin-dashboard.js or in a script tag
+document.getElementById('adminLogout').addEventListener('click', function(e) {
+    e.preventDefault();
+    
+    // Clear all admin session data
+    sessionStorage.removeItem('adminLoggedIn');
+    sessionStorage.removeItem('adminUsername');
+    sessionStorage.removeItem('adminPassword');
+    sessionStorage.removeItem('loginTime');
+    
+    // Redirect to login page
+    window.location.href = 'admin-login.html';
+});
