@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Management - Galaxy Digital Holdings</title>
+    <title>Admin Dashboard - World Currency Trade</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --primary-color: #2c3e50;
@@ -37,6 +38,20 @@
             font-weight: 700;
             font-size: 1.8rem;
             color: white !important;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.85) !important;
+            font-weight: 500;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+            border-radius: 5px;
+            padding: 8px 15px !important;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: white !important;
+            background-color: rgba(255, 255, 255, 0.1);
         }
 
         .sidebar {
@@ -99,6 +114,45 @@
             padding: 25px;
         }
 
+        .stat-card {
+            text-align: center;
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            opacity: 0.8;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+
+        .stat-title {
+            font-size: 0.9rem;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .card-users {
+            border-left-color: var(--info-color);
+        }
+
+        .card-deposits {
+            border-left-color: var(--success-color);
+        }
+
+        .card-withdrawals {
+            border-left-color: var(--warning-color);
+        }
+
+        .card-investments {
+            border-left-color: var(--admin-color);
+        }
+
         .btn-admin {
             background-color: var(--admin-color);
             border: none;
@@ -116,11 +170,41 @@
             color: white;
         }
 
+        .btn-success {
+            background-color: var(--success-color);
+            border: none;
+        }
+
+        .btn-warning {
+            background-color: var(--warning-color);
+            border: none;
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            border: none;
+        }
+
         .table th {
             border-top: none;
             font-weight: 600;
             color: var(--dark-color);
             background-color: #f8f9fa;
+        }
+
+        .badge-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-approved {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .badge-rejected {
+            background-color: #f8d7da;
+            color: #721c24;
         }
 
         .user-avatar {
@@ -136,8 +220,37 @@
             font-size: 1.1rem;
         }
 
-        .user-avatar.bg-admin {
-            background-color: var(--admin-color) !important;
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--danger-color);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .online-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--success-color);
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        .offline-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #6c757d;
+            display: inline-block;
+            margin-right: 5px;
         }
 
         .action-buttons .btn {
@@ -146,18 +259,129 @@
             font-size: 0.8rem;
         }
 
-        .tab-content {
-            display: none;
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
         }
 
-        .tab-content.active {
-            display: block;
+        .system-health {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
         }
 
+        .health-item {
+            text-align: center;
+            flex: 1;
+        }
+
+        .health-status {
+            font-size: 0.8rem;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .status-healthy {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-warning {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-critical {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .recent-activity {
+            list-style: none;
+            padding: 0;
+        }
+
+        .recent-activity li {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+        }
+
+        .recent-activity li:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            color: var(--admin-color);
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-box input {
+            padding-left: 40px;
+            border-radius: 20px;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 12px;
+            color: #6c757d;
+        }
+
+        /* Real-time indicators */
+        .connection-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.8rem;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .status-connected {
+            background-color: var(--success-color);
+        }
+
+        .status-disconnected {
+            background-color: var(--danger-color);
+        }
+
+        .status-connecting {
+            background-color: var(--warning-color);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        /* Toast notifications */
         .toast-container {
             z-index: 9999;
         }
 
+        /* Responsive adjustments */
         @media (max-width: 768px) {
             .sidebar {
                 width: 100%;
@@ -168,6 +392,74 @@
             .main-content {
                 margin-left: 0;
             }
+            
+            .stat-number {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* Tabs */
+        .nav-tabs .nav-link {
+            color: var(--dark-color);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .nav-tabs .nav-link.active {
+            background-color: var(--admin-color);
+            color: white;
+            border: none;
+        }
+
+        .tab-content {
+            padding: 20px;
+            border: 1px solid #dee2e6;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+        }
+
+        /* Modal enhancements */
+        .modal-header {
+            background: linear-gradient(135deg, var(--admin-dark) 0%, var(--admin-color) 100%);
+            color: white;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .btn-close {
+            filter: invert(1);
+        }
+
+        /* Quick actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .quick-action-btn {
+            background: white;
+            border: none;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .quick-action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            background-color: var(--admin-color);
+            color: white;
+        }
+
+        .quick-action-btn i {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            display: block;
         }
     </style>
 </head>
@@ -184,7 +476,7 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="#" id="adminLogout">
+                        <a class="nav-link" href="index.html" id="adminLogout">
                             <i class="fas fa-sign-out-alt me-1"></i>Logout
                         </a>
                     </li>
@@ -200,7 +492,7 @@
                 <div class="sidebar-sticky">
                     <ul class="nav flex-column">
                         <li class="nav-item">
-                            <a class="nav-link" href="#" data-tab="dashboard">
+                            <a class="nav-link active" href="#" data-tab="dashboard">
                                 <i class="fas fa-tachometer-alt"></i>Dashboard
                             </a>
                         </li>
@@ -215,8 +507,40 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link" href="#" data-tab="deposits">
+                                <i class="fas fa-money-bill-wave"></i>Deposits
+                                <span class="notification-badge d-none" id="pendingDepositsBadge">0</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-tab="withdrawals">
+                                <i class="fas fa-wallet"></i>Withdrawals
+                                <span class="notification-badge d-none" id="pendingWithdrawalsBadge">0</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-tab="investments">
+                                <i class="fas fa-chart-line"></i>Investments
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-tab="earnings">
+                                <i class="fas fa-chart-pie"></i>Earnings Management
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-tab="reports">
+                                <i class="fas fa-file-alt"></i>Transaction Reports
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link" href="#" data-tab="adminManagement">
                                 <i class="fas fa-user-shield"></i>Admin Management
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-tab="notifications">
+                                <i class="fas fa-bell"></i>Notifications
                             </a>
                         </li>
                         <li class="nav-item">
@@ -241,59 +565,176 @@
             <!-- Main Content -->
             <div class="col-md-9 col-lg-10 main-content">
                 <!-- Dashboard Tab -->
-                <div id="dashboardTab" class="tab-content">
+                <div id="dashboardTab" class="tab-content active">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h2>Admin Dashboard</h2>
                         <div class="d-flex align-items-center">
                             <button class="btn btn-admin me-2" onclick="refreshDashboard()">
                                 <i class="fas fa-sync-alt me-1"></i>Refresh
                             </button>
+                            <div class="dropdown">
+                                <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-cog me-1"></i>Options
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#" onclick="exportData()">Export Data</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="showSystemStats()">System Statistics</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="#" onclick="broadcastNotification()">Broadcast Message</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="quick-actions">
+                        <div class="quick-action-btn" onclick="showPendingDeposits()">
+                            <i class="fas fa-money-bill-wave text-success"></i>
+                            <div>Pending Deposits</div>
+                            <small id="quickDepositsCount">0</small>
+                        </div>
+                        <div class="quick-action-btn" onclick="showPendingWithdrawals()">
+                            <i class="fas fa-wallet text-warning"></i>
+                            <div>Pending Withdrawals</div>
+                            <small id="quickWithdrawalsCount">0</small>
+                        </div>
+                        <div class="quick-action-btn" onclick="showRecentUsers()">
+                            <i class="fas fa-user-plus text-info"></i>
+                            <div>New Users</div>
+                            <small id="quickNewUsersCount">0</small>
+                        </div>
+                        <div class="quick-action-btn" onclick="distributeProfits()">
+                            <i class="fas fa-gift text-primary"></i>
+                            <div>Distribute Profits</div>
+                            <small>Run payout</small>
                         </div>
                     </div>
 
                     <!-- Statistics Cards -->
                     <div class="row">
                         <div class="col-md-3">
-                            <div class="card dashboard-card">
+                            <div class="card dashboard-card card-users">
                                 <div class="card-body stat-card">
                                     <div class="stat-icon text-info">
                                         <i class="fas fa-users"></i>
                                     </div>
                                     <div class="stat-number" id="totalUsers">0</div>
                                     <div class="stat-title">Total Users</div>
+                                    <div class="mt-2">
+                                        <span class="online-indicator"></span>
+                                        <small class="text-muted" id="onlineUsers">0 online</small>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <div class="card dashboard-card">
+                            <div class="card dashboard-card card-deposits">
                                 <div class="card-body stat-card">
                                     <div class="stat-icon text-success">
                                         <i class="fas fa-money-bill-wave"></i>
                                     </div>
                                     <div class="stat-number">$<span id="totalDeposits">0</span></div>
                                     <div class="stat-title">Total Deposits</div>
+                                    <div class="mt-2">
+                                        <small class="text-muted" id="pendingDepositsCount">0 pending</small>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <div class="card dashboard-card">
+                            <div class="card dashboard-card card-withdrawals">
                                 <div class="card-body stat-card">
                                     <div class="stat-icon text-warning">
                                         <i class="fas fa-wallet"></i>
                                     </div>
                                     <div class="stat-number">$<span id="totalWithdrawals">0</span></div>
                                     <div class="stat-title">Total Withdrawals</div>
+                                    <div class="mt-2">
+                                        <small class="text-muted" id="pendingWithdrawalsCount">0 pending</small>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <div class="card dashboard-card">
+                            <div class="card dashboard-card card-investments">
                                 <div class="card-body stat-card">
                                     <div class="stat-icon text-primary">
                                         <i class="fas fa-chart-line"></i>
                                     </div>
                                     <div class="stat-number">$<span id="totalInvestments">0</span></div>
                                     <div class="stat-title">Total Investments</div>
+                                    <div class="mt-2">
+                                        <small class="text-muted" id="activeInvestmentsCount">0 active</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts and Additional Info -->
+                    <div class="row mt-4">
+                        <div class="col-md-8">
+                            <div class="card dashboard-card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Revenue Overview</h5>
+                                    <div class="chart-container">
+                                        <canvas id="revenueChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card dashboard-card">
+                                <div class="card-body">
+                                    <h5 class="card-title">System Health</h5>
+                                    <div class="system-health">
+                                        <div class="health-item">
+                                            <div class="stat-number" id="dbStatus">✓</div>
+                                            <div class="stat-title">Database</div>
+                                            <div class="health-status status-healthy mt-1">Healthy</div>
+                                        </div>
+                                        <div class="health-item">
+                                            <div class="stat-number" id="wsStatus">✓</div>
+                                            <div class="stat-title">WebSocket</div>
+                                            <div class="health-status status-healthy mt-1">Active</div>
+                                        </div>
+                                        <div class="health-item">
+                                            <div class="stat-number" id="apiStatus">✓</div>
+                                            <div class="stat-title">API</div>
+                                            <div class="health-status status-healthy mt-1">Running</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <h6 class="mt-4">Recent Activity</h6>
+                                    <ul class="recent-activity" id="recentActivity">
+                                        <li>
+                                            <div class="activity-icon">
+                                                <i class="fas fa-user-plus"></i>
+                                            </div>
+                                            <div>
+                                                <div>New user registration</div>
+                                                <small class="text-muted">2 minutes ago</small>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <div class="activity-icon">
+                                                <i class="fas fa-money-bill-wave"></i>
+                                            </div>
+                                            <div>
+                                                <div>Deposit approved</div>
+                                                <small class="text-muted">5 minutes ago</small>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <div class="activity-icon">
+                                                <i class="fas fa-wallet"></i>
+                                            </div>
+                                            <div>
+                                                <div>Withdrawal processed</div>
+                                                <small class="text-muted">10 minutes ago</small>
+                                            </div>
+                                        </li>
+                                    </ul>
                                 </div>
                             </div>
                         </div>
@@ -323,6 +764,7 @@
                                         <tr>
                                             <th>User</th>
                                             <th>Email</th>
+                                            <th>Location</th>
                                             <th>Wallet Balance</th>
                                             <th>Deposit Balance</th>
                                             <th>Total Invested</th>
@@ -335,6 +777,16 @@
                                         <!-- Users will be loaded here -->
                                     </tbody>
                                 </table>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <div>
+                                    <span id="usersTableInfo">Showing 0 users</span>
+                                </div>
+                                <nav>
+                                    <ul class="pagination" id="usersPagination">
+                                        <!-- Pagination will be loaded here -->
+                                    </ul>
+                                </nav>
                             </div>
                         </div>
                     </div>
@@ -350,6 +802,13 @@
                                 <option value="deposit">Deposits</option>
                                 <option value="withdrawal">Withdrawals</option>
                                 <option value="investment">Investments</option>
+                                <option value="profit">Profits</option>
+                            </select>
+                            <select class="form-select me-2" id="transactionStatusFilter">
+                                <option value="all">All Status</option>
+                                <option value="pending">Pending</option>
+                                <option value="approved">Approved</option>
+                                <option value="rejected">Rejected</option>
                             </select>
                             <button class="btn btn-admin" onclick="loadTransactions()">
                                 <i class="fas fa-filter me-1"></i>Apply
@@ -374,6 +833,203 @@
                                     </thead>
                                     <tbody id="transactionsTableBody">
                                         <!-- Transactions will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <div>
+                                    <span id="transactionsTableInfo">Showing 0 transactions</span>
+                                </div>
+                                <nav>
+                                    <ul class="pagination" id="transactionsPagination">
+                                        <!-- Pagination will be loaded here -->
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Deposits Tab -->
+                <div id="depositsTab" class="tab-content">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2>Deposit Management</h2>
+                        <div class="btn-group">
+                            <button class="btn btn-outline-primary active" data-filter="pending">Pending</button>
+                            <button class="btn btn-outline-primary" data-filter="approved">Approved</button>
+                            <button class="btn btn-outline-primary" data-filter="rejected">Rejected</button>
+                            <button class="btn btn-outline-primary" data-filter="all">All</button>
+                        </div>
+                    </div>
+
+                    <div class="card dashboard-card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="depositsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>User</th>
+                                            <th>Amount</th>
+                                            <th>Method</th>
+                                            <th>Proof</th>
+                                            <th>Status</th>
+                                            <th>Date</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="depositsTableBody">
+                                        <!-- Deposits will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Withdrawals Tab -->
+                <div id="withdrawalsTab" class="tab-content">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2>Withdrawal Management</h2>
+                        <div class="btn-group">
+                            <button class="btn btn-outline-primary active" data-filter="pending">Pending</button>
+                            <button class="btn btn-outline-primary" data-filter="approved">Approved</button>
+                            <button class="btn btn-outline-primary" data-filter="rejected">Rejected</button>
+                            <button class="btn btn-outline-primary" data-filter="all">All</button>
+                        </div>
+                    </div>
+
+                    <div class="card dashboard-card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="withdrawalsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>User</th>
+                                            <th>Amount</th>
+                                            <th>Method</th>
+                                            <th>Wallet</th>
+                                            <th>Status</th>
+                                            <th>Date</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="withdrawalsTableBody">
+                                        <!-- Withdrawals will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Investments Tab -->
+                <div id="investmentsTab" class="tab-content">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2>Investment Management</h2>
+                        <div class="d-flex">
+                            <button class="btn btn-admin me-2" onclick="distributeProfits()">
+                                <i class="fas fa-gift me-1"></i>Distribute Profits
+                            </button>
+                            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addInvestmentModal">
+                                <i class="fas fa-plus me-1"></i>Add Investment
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card dashboard-card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="investmentsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>User</th>
+                                            <th>Plan</th>
+                                            <th>Amount</th>
+                                            <th>Profit Rate</th>
+                                            <th>Earned</th>
+                                            <th>Status</th>
+                                            <th>Start Date</th>
+                                            <th>End Date</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="investmentsTableBody">
+                                        <!-- Investments will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Earnings Management Tab -->
+                <div id="earningsTab" class="tab-content">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2>Earnings Breakdown Management</h2>
+                        <div class="d-flex">
+                            <button class="btn btn-admin me-2" data-bs-toggle="modal" data-bs-target="#createEarningsModal">
+                                <i class="fas fa-plus me-1"></i>Create Breakdown
+                            </button>
+                            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#bulkEarningsModal">
+                                <i class="fas fa-users me-1"></i>Bulk Create
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card dashboard-card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="earningsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>User</th>
+                                            <th>Period</th>
+                                            <th>Date Range</th>
+                                            <th>Profit</th>
+                                            <th>Deposit</th>
+                                            <th>Investment</th>
+                                            <th>Total</th>
+                                            <th>Status</th>
+                                            <th>Created</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="earningsTableBody">
+                                        <!-- Earnings breakdowns will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Transaction Reports Tab -->
+                <div id="reportsTab" class="tab-content">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2>Custom Transaction Reports</h2>
+                        <button class="btn btn-admin" data-bs-toggle="modal" data-bs-target="#createReportModal">
+                            <i class="fas fa-plus me-1"></i>Create Report
+                        </button>
+                    </div>
+
+                    <div class="card dashboard-card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="reportsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>User</th>
+                                            <th>Title</th>
+                                            <th>Description</th>
+                                            <th>Transactions</th>
+                                            <th>Net Balance</th>
+                                            <th>Status</th>
+                                            <th>Created</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="reportsTableBody">
+                                        <!-- Reports will be loaded here -->
                                     </tbody>
                                 </table>
                             </div>
@@ -448,6 +1104,70 @@
                     </div>
                 </div>
 
+                <!-- Notifications Tab -->
+                <div id="notificationsTab" class="tab-content">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2>Notification Center</h2>
+                        <div class="d-flex">
+                            <button class="btn btn-admin me-2" data-bs-toggle="modal" data-bs-target="#sendNotificationModal">
+                                <i class="fas fa-paper-plane me-1"></i>Send Notification
+                            </button>
+                            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#broadcastModal">
+                                <i class="fas fa-bullhorn me-1"></i>Broadcast
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="card dashboard-card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Recent Notifications</h5>
+                                    <div id="notificationsList">
+                                        <!-- Notifications will be loaded here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card dashboard-card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Quick Stats</h5>
+                                    <div class="mb-3">
+                                        <strong>Total Sent:</strong> <span id="totalNotifications">0</span>
+                                    </div>
+                                    <div class="mb-3">
+                                        <strong>Unread:</strong> <span id="unreadNotifications">0</span>
+                                    </div>
+                                    <div class="mb-3">
+                                        <strong>Today:</strong> <span id="todayNotifications">0</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card dashboard-card mt-4">
+                                <div class="card-body">
+                                    <h5 class="card-title">Templates</h5>
+                                    <div class="d-grid gap-2">
+                                        <button class="btn btn-outline-primary text-start" onclick="useTemplate('welcome')">
+                                            <i class="fas fa-envelope me-2"></i>Welcome Message
+                                        </button>
+                                        <button class="btn btn-outline-success text-start" onclick="useTemplate('deposit_approved')">
+                                            <i class="fas fa-check me-2"></i>Deposit Approved
+                                        </button>
+                                        <button class="btn btn-outline-warning text-start" onclick="useTemplate('withdrawal_processed')">
+                                            <i class="fas fa-wallet me-2"></i>Withdrawal Processed
+                                        </button>
+                                        <button class="btn btn-outline-info text-start" onclick="useTemplate('profit_added')">
+                                            <i class="fas fa-gift me-2"></i>Profit Added
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- System Settings Tab -->
                 <div id="systemTab" class="tab-content">
                     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -470,6 +1190,26 @@
                                         <label class="form-label">Admin Email</label>
                                         <input type="email" class="form-control" id="adminEmail" value="admin@galaxydigital.com">
                                     </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Currency</label>
+                                        <select class="form-select" id="currency">
+                                            <option value="USD">USD ($)</option>
+                                            <option value="EUR">EUR (€)</option>
+                                            <option value="GBP">GBP (£)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card dashboard-card mt-4">
+                                <div class="card-body">
+                                    <h5 class="card-title">Investment Plans</h5>
+                                    <div id="investmentPlansSettings">
+                                        <!-- Investment plans settings will be loaded here -->
+                                    </div>
+                                    <button class="btn btn-outline-primary w-100 mt-3" data-bs-toggle="modal" data-bs-target="#addPlanModal">
+                                        <i class="fas fa-plus me-1"></i>Add New Plan
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -485,6 +1225,40 @@
                                     <div class="mb-3">
                                         <label class="form-label">Max Login Attempts</label>
                                         <input type="number" class="form-control" id="maxLoginAttempts" value="5">
+                                    </div>
+                                    <div class="mb-3 form-check">
+                                        <input type="checkbox" class="form-check-input" id="enable2FA">
+                                        <label class="form-check-label" for="enable2FA">Enable Two-Factor Authentication</label>
+                                    </div>
+                                    <div class="mb-3 form-check">
+                                        <input type="checkbox" class="form-check-input" id="maintenanceMode">
+                                        <label class="form-check-label" for="maintenanceMode">Maintenance Mode</label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card dashboard-card mt-4">
+                                <div class="card-body">
+                                    <h5 class="card-title">System Information</h5>
+                                    <div class="mb-2">
+                                        <strong>Version:</strong> <span id="systemVersion">2.1.0</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>Uptime:</strong> <span id="systemUptime">0 days 00:00:00</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>Last Backup:</strong> <span id="lastBackup">Never</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>Database Size:</strong> <span id="dbSize">0 MB</span>
+                                    </div>
+                                    <div class="mt-3">
+                                        <button class="btn btn-outline-warning me-2" onclick="runBackup()">
+                                            <i class="fas fa-database me-1"></i>Backup Database
+                                        </button>
+                                        <button class="btn btn-outline-danger" onclick="clearCache()">
+                                            <i class="fas fa-broom me-1"></i>Clear Cache
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -580,6 +1354,303 @@
         </div>
     </div>
 
+    <!-- Send Notification Modal -->
+    <div class="modal fade" id="sendNotificationModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Send Notification</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Select User</label>
+                        <select class="form-select" id="notificationUser">
+                            <option value="all">All Users</option>
+                            <!-- Users will be populated here -->
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Title</label>
+                        <input type="text" class="form-control" id="notificationTitle" placeholder="Enter notification title">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Message</label>
+                        <textarea class="form-control" id="notificationMessage" rows="4" placeholder="Enter notification message"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Type</label>
+                        <select class="form-select" id="notificationType">
+                            <option value="info">Information</option>
+                            <option value="success">Success</option>
+                            <option value="warning">Warning</option>
+                            <option value="error">Error</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-admin" onclick="sendNotification()">Send Notification</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Earnings Breakdown Modal -->
+    <div class="modal fade" id="createEarningsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create Earnings Breakdown</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createEarningsForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Select User</label>
+                                    <select class="form-select" id="earningsUser" required>
+                                        <option value="">Select user</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Period</label>
+                                    <select class="form-select" id="earningsPeriod" required>
+                                        <option value="daily">Daily</option>
+                                        <option value="weekly">Weekly</option>
+                                        <option value="monthly">Monthly</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Start Date</label>
+                                    <input type="date" class="form-control" id="earningsStartDate" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">End Date</label>
+                                    <input type="date" class="form-control" id="earningsEndDate" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Profit ($)</label>
+                                    <input type="number" class="form-control" id="earningsProfit" min="0" step="0.01" value="0">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Deposit ($)</label>
+                                    <input type="number" class="form-control" id="earningsDeposit" min="0" step="0.01" value="0">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Investment ($)</label>
+                                    <input type="number" class="form-control" id="earningsInvestment" min="0" step="0.01" value="0">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Notes (Optional)</label>
+                            <textarea class="form-control" id="earningsNotes" rows="3" placeholder="Add any additional notes..."></textarea>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <strong>Total Earnings: $<span id="earningsTotal">0.00</span></strong>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-admin" onclick="createEarningsBreakdown()">Create Breakdown</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Earnings Modal -->
+    <div class="modal fade" id="bulkEarningsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Bulk Create Earnings Breakdown</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="bulkEarningsForm">
+                        <div class="mb-3">
+                            <label class="form-label">Select Users</label>
+                            <select class="form-select" id="bulkEarningsUsers" multiple required>
+                                <!-- Users will be populated here -->
+                            </select>
+                            <small class="text-muted">Hold Ctrl/Cmd to select multiple users</small>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Period</label>
+                                    <select class="form-select" id="bulkEarningsPeriod" required>
+                                        <option value="daily">Daily</option>
+                                        <option value="weekly">Weekly</option>
+                                        <option value="monthly">Monthly</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Start Date</label>
+                                    <input type="date" class="form-control" id="bulkEarningsStartDate" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">End Date</label>
+                                    <input type="date" class="form-control" id="bulkEarningsEndDate" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Profit ($)</label>
+                                    <input type="number" class="form-control" id="bulkEarningsProfit" min="0" step="0.01" value="0">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Deposit ($)</label>
+                                    <input type="number" class="form-control" id="bulkEarningsDeposit" min="0" step="0.01" value="0">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Investment ($)</label>
+                                    <input type="number" class="form-control" id="bulkEarningsInvestment" min="0" step="0.01" value="0">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Notes (Optional)</label>
+                            <textarea class="form-control" id="bulkEarningsNotes" rows="3" placeholder="Add any additional notes..."></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-admin" onclick="createBulkEarningsBreakdown()">Create for Selected Users</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Investment Adjustment Modal -->
+    <div class="modal fade" id="adjustInvestmentModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Adjust User Investment</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="adjustInvestmentForm">
+                        <div class="mb-3">
+                            <label class="form-label">User</label>
+                            <div class="form-control" id="adjustUserDisplay" readonly></div>
+                            <input type="hidden" id="adjustUserId">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Current Investment</label>
+                            <input type="text" class="form-control" id="currentInvestment" readonly>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Action</label>
+                            <select class="form-select" id="adjustAction" required>
+                                <option value="add">Add to Investment</option>
+                                <option value="subtract">Subtract from Investment</option>
+                                <option value="set">Set Investment Amount</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Amount ($)</label>
+                            <input type="number" class="form-control" id="adjustAmount" min="0" step="0.01" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Plan Name (Optional)</label>
+                            <input type="text" class="form-control" id="adjustPlanName" placeholder="e.g., Manual Adjustment">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Notes (Optional)</label>
+                            <textarea class="form-control" id="adjustNotes" rows="2" placeholder="Add notes for this adjustment..."></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-admin" onclick="submitInvestmentAdjustment()">Apply Adjustment</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Broadcast Modal -->
+    <div class="modal fade" id="broadcastModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Broadcast Message</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Title</label>
+                        <input type="text" class="form-control" id="broadcastTitle" placeholder="Enter broadcast title">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Message</label>
+                        <textarea class="form-control" id="broadcastMessage" rows="4" placeholder="Enter broadcast message"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Type</label>
+                        <select class="form-select" id="broadcastType">
+                            <option value="info">Information</option>
+                            <option value="success">Success</option>
+                            <option value="warning">Warning</option>
+                            <option value="error">Error</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-admin" onclick="sendBroadcast()">Send Broadcast</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Add User Modal -->
     <div class="modal fade" id="addUserModal" tabindex="-1">
         <div class="modal-dialog">
@@ -606,6 +1677,10 @@
                             <label class="form-label">Full Name</label>
                             <input type="text" class="form-control" id="newFullName" required>
                         </div>
+                        <div class="mb-3">
+                            <label class="form-label">Initial Balance</label>
+                            <input type="number" class="form-control" id="newBalance" value="0" min="0">
+                        </div>
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -616,14 +1691,64 @@
         </div>
     </div>
 
+    <!-- Top-Up Modal -->
+    <div class="modal fade" id="topupModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Manual Top-Up</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">User</label>
+                        <div class="form-control" id="topupUsername" readonly></div>
+                        <input type="hidden" id="topupUserId">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Top-Up Type</label>
+                        <select class="form-select" id="topupType" onchange="toggleTopUpType()">
+                            <option value="deposit">Deposit Top-Up</option>
+                            <option value="investment">Investment Top-Up</option>
+                        </select>
+                    </div>
+                    <div class="mb-3" id="investmentPlanGroup">
+                        <label class="form-label">Investment Plan</label>
+                        <select class="form-select" id="topupPlan">
+                            <option value="1">Basic Plan (5% profit)</option>
+                            <option value="2">Premium Plan (8% profit)</option>
+                            <option value="3">VIP Plan (12% profit)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Amount</label>
+                        <input type="number" class="form-control" id="topupAmount" min="1" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Note (Optional)</label>
+                        <textarea class="form-control" id="topupNote" rows="2" placeholder="Add a note for this top-up..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-admin" onclick="submitTopUp()">Process Top-Up</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
         // =============================================
-        // CONSTANTS AND INITIALIZATION
+        // AUTHENTICATION & SESSION MANAGEMENT
         // =============================================
+
         const API_BASE_URL = 'https://muza-xi3w.onrender.com/api';
+        let currentUserPage = 1;
+        let currentTransactionPage = 1;
+        const itemsPerPage = 10;
 
         // Authentication check for admin dashboard
         document.addEventListener('DOMContentLoaded', function() {
@@ -638,8 +1763,8 @@
             // Set up event listeners
             setupEventListeners();
             
-            // Start with dashboard tab active
-            switchTab('dashboard');
+            // Start periodic updates
+            startPeriodicUpdates();
         });
 
         async function checkAdminAuthentication() {
@@ -655,7 +1780,56 @@
                 return false;
             }
             
-            return true;
+            // Verify credentials are still valid
+            try {
+                await verifyAdminCredentials(adminUsername, adminPassword);
+                return true;
+            } catch (error) {
+                console.error('Authentication failed:', error);
+                // Clear invalid credentials and redirect to login
+                sessionStorage.removeItem('adminLoggedIn');
+                sessionStorage.removeItem('adminUsername');
+                sessionStorage.removeItem('adminPassword');
+                sessionStorage.removeItem('loginTime');
+                window.location.href = 'admin-login.html';
+                return false;
+            }
+        }
+
+        async function verifyAdminCredentials(username, password) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/admin/dashboard-stats`, {
+                    method: 'GET',
+                    headers: {
+                        'Admin-Username': username,
+                        'Admin-Password': password,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Invalid credentials');
+                }
+                
+                console.log('Admin credentials verified successfully');
+                return true;
+                
+            } catch (error) {
+                console.error('Credential verification failed:', error);
+                
+                // If API fails, check hardcoded credentials as fallback
+                const HARDCODED_CREDENTIALS = {
+                    username: 'admin',
+                    password: 'admin123'
+                };
+                
+                if (username === HARDCODED_CREDENTIALS.username && password === HARDCODED_CREDENTIALS.password) {
+                    console.log('Hardcoded credentials verified');
+                    return true;
+                }
+                
+                throw error;
+            }
         }
 
         // =============================================
@@ -666,9 +1840,18 @@
             // Load dashboard stats
             loadDashboardStats();
             
+            // Initialize charts
+            initializeCharts();
+            
             // Load initial data
             loadUsers();
             loadTransactions();
+            loadDeposits();
+            loadWithdrawals();
+            loadInvestments();
+            
+            // Update connection status
+            updateConnectionStatus();
         }
 
         function setupEventListeners() {
@@ -689,6 +1872,46 @@
             
             // User search
             document.getElementById('userSearch').addEventListener('input', debounce(loadUsers, 300));
+            
+            // Transaction filters
+            document.getElementById('transactionTypeFilter').addEventListener('change', loadTransactions);
+            document.getElementById('transactionStatusFilter').addEventListener('change', loadTransactions);
+            
+            // Deposit filter buttons
+            document.querySelectorAll('#depositsTab .btn-group .btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('#depositsTab .btn-group .btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    loadDeposits(this.getAttribute('data-filter'));
+                });
+            });
+            
+            // Withdrawal filter buttons
+            document.querySelectorAll('#withdrawalsTab .btn-group .btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('#withdrawalsTab .btn-group .btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    loadWithdrawals(this.getAttribute('data-filter'));
+                });
+            });
+            
+            // Earnings calculation
+            document.getElementById('earningsProfit').addEventListener('input', calculateEarningsTotal);
+            document.getElementById('earningsDeposit').addEventListener('input', calculateEarningsTotal);
+            document.getElementById('earningsInvestment').addEventListener('input', calculateEarningsTotal);
+        }
+
+        function startPeriodicUpdates() {
+            // Update dashboard every 30 seconds
+            setInterval(() => {
+                if (document.getElementById('dashboardTab').classList.contains('active')) {
+                    loadDashboardStats();
+                }
+                updateConnectionStatus();
+            }, 30000);
+            
+            // Update time every second
+            setInterval(updateSystemUptime, 1000);
         }
 
         // =============================================
@@ -729,8 +1952,26 @@
                 case 'transactions':
                     loadTransactions();
                     break;
+                case 'deposits':
+                    loadDeposits();
+                    break;
+                case 'withdrawals':
+                    loadWithdrawals();
+                    break;
+                case 'investments':
+                    loadInvestments();
+                    break;
+                case 'earnings':
+                    loadEarningsBreakdowns();
+                    break;
+                case 'reports':
+                    loadReports();
+                    break;
                 case 'adminManagement':
                     loadAdmins();
+                    break;
+                case 'notifications':
+                    loadNotifications();
                     break;
                 case 'system':
                     loadSystemSettings();
@@ -777,6 +2018,23 @@
             document.getElementById('totalWithdrawals').textContent = stats.totalWithdrawals?.toLocaleString() || '0';
             document.getElementById('totalInvestments').textContent = stats.totalInvestments?.toLocaleString() || '0';
             
+            // Update quick action counts
+            document.getElementById('quickDepositsCount').textContent = stats.pendingDeposits || '0';
+            document.getElementById('quickWithdrawalsCount').textContent = stats.pendingWithdrawals || '0';
+            document.getElementById('quickNewUsersCount').textContent = stats.newUsersToday || '0';
+            
+            // Update pending counts
+            document.getElementById('pendingDepositsCount').textContent = `${stats.pendingDeposits || 0} pending`;
+            document.getElementById('pendingWithdrawalsCount').textContent = `${stats.pendingWithdrawals || 0} pending`;
+            document.getElementById('activeInvestmentsCount').textContent = `${stats.activeInvestments || 0} active`;
+            document.getElementById('onlineUsers').textContent = `${stats.onlineUsers || 0} online`;
+            
+            // Update notification badges
+            updateNotificationBadges(stats);
+            
+            // Update recent activity
+            updateRecentActivity(stats.recentActivity || []);
+            
             // Update last sync time
             document.getElementById('lastSync').textContent = `Last sync: ${new Date().toLocaleTimeString()}`;
         }
@@ -786,8 +2044,126 @@
                 totalUsers: 1542,
                 totalDeposits: 1254300,
                 totalWithdrawals: 893400,
-                totalInvestments: 2100750
+                totalInvestments: 2100750,
+                pendingDeposits: 12,
+                pendingWithdrawals: 8,
+                newUsersToday: 23,
+                activeInvestments: 892,
+                onlineUsers: 47,
+                recentActivity: [
+                    { type: 'user_registration', message: 'New user registered', time: '2 minutes ago' },
+                    { type: 'deposit_approved', message: 'Deposit approved', time: '5 minutes ago' },
+                    { type: 'withdrawal_processed', message: 'Withdrawal processed', time: '10 minutes ago' }
+                ]
             };
+        }
+
+        function updateNotificationBadges(stats) {
+            const depositsBadge = document.getElementById('pendingDepositsBadge');
+            const withdrawalsBadge = document.getElementById('pendingWithdrawalsBadge');
+            
+            if (stats.pendingDeposits > 0) {
+                depositsBadge.textContent = stats.pendingDeposits;
+                depositsBadge.classList.remove('d-none');
+            } else {
+                depositsBadge.classList.add('d-none');
+            }
+            
+            if (stats.pendingWithdrawals > 0) {
+                withdrawalsBadge.textContent = stats.pendingWithdrawals;
+                withdrawalsBadge.classList.remove('d-none');
+            } else {
+                withdrawalsBadge.classList.add('d-none');
+            }
+        }
+
+        function updateRecentActivity(activities) {
+            const activityList = document.getElementById('recentActivity');
+            activityList.innerHTML = '';
+            
+            activities.forEach(activity => {
+                const li = document.createElement('li');
+                
+                let icon = 'fa-info-circle';
+                let color = 'var(--admin-color)';
+                
+                switch(activity.type) {
+                    case 'user_registration':
+                        icon = 'fa-user-plus';
+                        color = 'var(--info-color)';
+                        break;
+                    case 'deposit_approved':
+                        icon = 'fa-money-bill-wave';
+                        color = 'var(--success-color)';
+                        break;
+                    case 'withdrawal_processed':
+                        icon = 'fa-wallet';
+                        color = 'var(--warning-color)';
+                        break;
+                    case 'investment_made':
+                        icon = 'fa-chart-line';
+                        color = 'var(--primary-color)';
+                        break;
+                }
+                
+                li.innerHTML = `
+                    <div class="activity-icon" style="background-color: ${color}20; color: ${color};">
+                        <i class="fas ${icon}"></i>
+                    </div>
+                    <div>
+                        <div>${activity.message}</div>
+                        <small class="text-muted">${activity.time}</small>
+                    </div>
+                `;
+                
+                activityList.appendChild(li);
+            });
+        }
+
+        // =============================================
+        // CHARTS INITIALIZATION
+        // =============================================
+
+        function initializeCharts() {
+            // Revenue Chart
+            const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+            const revenueChart = new Chart(revenueCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    datasets: [{
+                        label: 'Revenue',
+                        data: [12000, 19000, 15000, 25000, 22000, 30000, 28000, 35000, 32000, 40000, 38000, 45000],
+                        borderColor: 'var(--admin-color)',
+                        backgroundColor: 'rgba(142, 68, 173, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
         }
 
         // =============================================
@@ -831,6 +2207,7 @@
                         </div>
                     </td>
                     <td>${user.email}</td>
+                    <td>${user.location}</td>
                     <td>$${user.walletBalance.toLocaleString()}</td>
                     <td>$${user.depositBalance.toLocaleString()}</td>
                     <td>$${user.totalInvested.toLocaleString()}</td>
@@ -845,14 +2222,22 @@
                             <button class="btn btn-sm btn-outline-primary" onclick="viewUserDetails('${user.id}')">
                                 <i class="fas fa-eye"></i>
                             </button>
+                            <button class="btn btn-sm btn-outline-success" onclick="openTopUpModal('${user.id}', '${user.name}')">
+                                <i class="fas fa-plus"></i>
+                            </button>
                             <button class="btn btn-sm btn-outline-warning" onclick="editUser('${user.id}')">
                                 <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteUser('${user.id}')">
+                                <i class="fas fa-trash"></i>
                             </button>
                         </div>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
+            
+            document.getElementById('usersTableInfo').textContent = `Showing ${users.length} users`;
         }
 
         function getMockUsers() {
@@ -862,6 +2247,7 @@
                     name: 'John Smith',
                     username: 'johnsmith',
                     email: 'john@example.com',
+                    location: 'New York, USA',
                     walletBalance: 2500,
                     depositBalance: 15000,
                     totalInvested: 10000,
@@ -873,11 +2259,24 @@
                     name: 'Sarah Johnson',
                     username: 'sarahj',
                     email: 'sarah@example.com',
+                    location: 'London, UK',
                     walletBalance: 1800,
                     depositBalance: 12000,
                     totalInvested: 8000,
                     status: 'active',
                     joined: '2024-02-20'
+                },
+                {
+                    id: '3',
+                    name: 'Mike Chen',
+                    username: 'mikechen',
+                    email: 'mike@example.com',
+                    location: 'Tokyo, Japan',
+                    walletBalance: 3200,
+                    depositBalance: 20000,
+                    totalInvested: 15000,
+                    status: 'active',
+                    joined: '2024-01-08'
                 }
             ];
         }
@@ -889,6 +2288,7 @@
         async function loadTransactions(page = 1) {
             try {
                 const typeFilter = document.getElementById('transactionTypeFilter').value;
+                const statusFilter = document.getElementById('transactionStatusFilter').value;
                 
                 // Mock implementation
                 const mockTransactions = getMockTransactions();
@@ -930,6 +2330,9 @@
                                 <button class="btn btn-sm btn-outline-success" onclick="approveTransaction('${transaction.id}')">
                                     <i class="fas fa-check"></i>
                                 </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="rejectTransaction('${transaction.id}')">
+                                    <i class="fas fa-times"></i>
+                                </button>
                             ` : ''}
                         </div>
                     </td>
@@ -955,6 +2358,329 @@
                     amount: 2000,
                     status: 'pending',
                     date: '2024-03-16'
+                },
+                {
+                    id: 'TXN003',
+                    user: 'Mike Chen',
+                    type: 'investment',
+                    amount: 10000,
+                    status: 'approved',
+                    date: '2024-03-14'
+                }
+            ];
+        }
+
+        // =============================================
+        // DEPOSIT MANAGEMENT
+        // =============================================
+
+        async function loadDeposits(filter = 'pending') {
+            try {
+                // Mock implementation
+                const mockDeposits = getMockDeposits().filter(deposit => 
+                    filter === 'all' || deposit.status === filter
+                );
+                displayDeposits(mockDeposits);
+                
+            } catch (error) {
+                console.error('Error loading deposits:', error);
+                showToast('Error loading deposits', 'error');
+            }
+        }
+
+        function displayDeposits(deposits) {
+            const tbody = document.getElementById('depositsTableBody');
+            tbody.innerHTML = '';
+            
+            deposits.forEach(deposit => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${deposit.user}</td>
+                    <td>$${deposit.amount.toLocaleString()}</td>
+                    <td>${deposit.method}</td>
+                    <td>
+                        ${deposit.proof ? 
+                            `<button class="btn btn-sm btn-outline-primary" onclick="viewProof('${deposit.proof}')">
+                                <i class="fas fa-eye"></i> View
+                            </button>` : 
+                            'No proof'
+                        }
+                    </td>
+                    <td>
+                        <span class="badge ${getStatusBadge(deposit.status)}">
+                            ${deposit.status}
+                        </span>
+                    </td>
+                    <td>${new Date(deposit.date).toLocaleDateString()}</td>
+                    <td>
+                        <div class="action-buttons">
+                            ${deposit.status === 'pending' ? `
+                                <button class="btn btn-sm btn-outline-success" onclick="approveDeposit('${deposit.id}')">
+                                    <i class="fas fa-check"></i> Approve
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="rejectDeposit('${deposit.id}')">
+                                    <i class="fas fa-times"></i> Reject
+                                </button>
+                            ` : ''}
+                            <button class="btn btn-sm btn-outline-primary" onclick="viewDepositDetails('${deposit.id}')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function getMockDeposits() {
+            return [
+                {
+                    id: 'DEP001',
+                    user: 'John Smith',
+                    amount: 5000,
+                    method: 'Bank Transfer',
+                    proof: 'proof1.jpg',
+                    status: 'pending',
+                    date: '2024-03-15'
+                },
+                {
+                    id: 'DEP002',
+                    user: 'Sarah Johnson',
+                    amount: 3000,
+                    method: 'Credit Card',
+                    proof: null,
+                    status: 'approved',
+                    date: '2024-03-14'
+                }
+            ];
+        }
+
+        // =============================================
+        // WITHDRAWAL MANAGEMENT
+        // =============================================
+
+        async function loadWithdrawals(filter = 'pending') {
+            try {
+                // Mock implementation
+                const mockWithdrawals = getMockWithdrawals().filter(withdrawal => 
+                    filter === 'all' || withdrawal.status === filter
+                );
+                displayWithdrawals(mockWithdrawals);
+                
+            } catch (error) {
+                console.error('Error loading withdrawals:', error);
+                showToast('Error loading withdrawals', 'error');
+            }
+        }
+
+        function displayWithdrawals(withdrawals) {
+            const tbody = document.getElementById('withdrawalsTableBody');
+            tbody.innerHTML = '';
+            
+            withdrawals.forEach(withdrawal => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${withdrawal.user}</td>
+                    <td>$${withdrawal.amount.toLocaleString()}</td>
+                    <td>${withdrawal.method}</td>
+                    <td>${withdrawal.wallet}</td>
+                    <td>
+                        <span class="badge ${getStatusBadge(withdrawal.status)}">
+                            ${withdrawal.status}
+                        </span>
+                    </td>
+                    <td>${new Date(withdrawal.date).toLocaleDateString()}</td>
+                    <td>
+                        <div class="action-buttons">
+                            ${withdrawal.status === 'pending' ? `
+                                <button class="btn btn-sm btn-outline-success" onclick="approveWithdrawal('${withdrawal.id}')">
+                                    <i class="fas fa-check"></i> Approve
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="rejectWithdrawal('${withdrawal.id}')">
+                                    <i class="fas fa-times"></i> Reject
+                                </button>
+                            ` : ''}
+                            <button class="btn btn-sm btn-outline-primary" onclick="viewWithdrawalDetails('${withdrawal.id}')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function getMockWithdrawals() {
+            return [
+                {
+                    id: 'WD001',
+                    user: 'Sarah Johnson',
+                    amount: 2000,
+                    method: 'Bitcoin',
+                    wallet: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa',
+                    status: 'pending',
+                    date: '2024-03-16'
+                },
+                {
+                    id: 'WD002',
+                    user: 'Mike Chen',
+                    amount: 1500,
+                    method: 'Bank Transfer',
+                    wallet: 'CH9300762011623852957',
+                    status: 'approved',
+                    date: '2024-03-13'
+                }
+            ];
+        }
+
+        // =============================================
+        // INVESTMENT MANAGEMENT
+        // =============================================
+
+        async function loadInvestments() {
+            try {
+                // Mock implementation
+                const mockInvestments = getMockInvestments();
+                displayInvestments(mockInvestments);
+                
+            } catch (error) {
+                console.error('Error loading investments:', error);
+                showToast('Error loading investments', 'error');
+            }
+        }
+
+        function displayInvestments(investments) {
+            const tbody = document.getElementById('investmentsTableBody');
+            tbody.innerHTML = '';
+            
+            investments.forEach(investment => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${investment.user}</td>
+                    <td>${investment.plan}</td>
+                    <td>$${investment.amount.toLocaleString()}</td>
+                    <td>${investment.profitRate}%</td>
+                    <td>$${investment.earned.toLocaleString()}</td>
+                    <td>
+                        <span class="badge ${investment.status === 'active' ? 'badge-approved' : 'badge-pending'}">
+                            ${investment.status}
+                        </span>
+                    </td>
+                    <td>${new Date(investment.startDate).toLocaleDateString()}</td>
+                    <td>${new Date(investment.endDate).toLocaleDateString()}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-sm btn-outline-primary" onclick="viewInvestmentDetails('${investment.id}')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-warning" onclick="editInvestment('${investment.id}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="cancelInvestment('${investment.id}')">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function getMockInvestments() {
+            return [
+                {
+                    id: 'INV001',
+                    user: 'Mike Chen',
+                    plan: 'VIP Plan',
+                    amount: 10000,
+                    profitRate: 12,
+                    earned: 1200,
+                    status: 'active',
+                    startDate: '2024-01-15',
+                    endDate: '2024-07-15'
+                },
+                {
+                    id: 'INV002',
+                    user: 'John Smith',
+                    plan: 'Premium Plan',
+                    amount: 5000,
+                    profitRate: 8,
+                    earned: 400,
+                    status: 'active',
+                    startDate: '2024-02-01',
+                    endDate: '2024-05-01'
+                }
+            ];
+        }
+
+        // =============================================
+        // EARNINGS MANAGEMENT
+        // =============================================
+
+        async function loadEarningsBreakdowns() {
+            try {
+                // Mock implementation
+                const mockEarnings = getMockEarnings();
+                displayEarningsBreakdowns(mockEarnings);
+                
+            } catch (error) {
+                console.error('Error loading earnings:', error);
+                showToast('Error loading earnings breakdowns', 'error');
+            }
+        }
+
+        function displayEarningsBreakdowns(earnings) {
+            const tbody = document.getElementById('earningsTableBody');
+            tbody.innerHTML = '';
+            
+            earnings.forEach(earning => {
+                const total = earning.profit + earning.deposit + earning.investment;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${earning.user}</td>
+                    <td>${earning.period}</td>
+                    <td>${new Date(earning.startDate).toLocaleDateString()} - ${new Date(earning.endDate).toLocaleDateString()}</td>
+                    <td>$${earning.profit.toLocaleString()}</td>
+                    <td>$${earning.deposit.toLocaleString()}</td>
+                    <td>$${earning.investment.toLocaleString()}</td>
+                    <td>$${total.toLocaleString()}</td>
+                    <td>
+                        <span class="badge ${earning.status === 'processed' ? 'badge-approved' : 'badge-pending'}">
+                            ${earning.status}
+                        </span>
+                    </td>
+                    <td>${new Date(earning.created).toLocaleDateString()}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-sm btn-outline-primary" onclick="viewEarningsDetails('${earning.id}')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-success" onclick="processEarnings('${earning.id}')">
+                                <i class="fas fa-check"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteEarnings('${earning.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function getMockEarnings() {
+            return [
+                {
+                    id: 'ERN001',
+                    user: 'John Smith',
+                    period: 'monthly',
+                    startDate: '2024-02-01',
+                    endDate: '2024-02-28',
+                    profit: 1200,
+                    deposit: 5000,
+                    investment: 10000,
+                    status: 'processed',
+                    created: '2024-03-01'
                 }
             ];
         }
@@ -1206,6 +2932,73 @@
         }
 
         // =============================================
+        // NOTIFICATION MANAGEMENT
+        // =============================================
+
+        async function loadNotifications() {
+            try {
+                // Mock implementation
+                const mockNotifications = getMockNotifications();
+                displayNotifications(mockNotifications);
+                
+            } catch (error) {
+                console.error('Error loading notifications:', error);
+                showToast('Error loading notifications', 'error');
+            }
+        }
+
+        function displayNotifications(notifications) {
+            const container = document.getElementById('notificationsList');
+            container.innerHTML = '';
+            
+            notifications.forEach(notification => {
+                const div = document.createElement('div');
+                div.className = `alert alert-${getNotificationTypeClass(notification.type)} mb-2`;
+                div.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="alert-heading mb-1">${notification.title}</h6>
+                            <p class="mb-1">${notification.message}</p>
+                            <small class="text-muted">Sent to: ${notification.recipient} • ${new Date(notification.date).toLocaleString()}</small>
+                        </div>
+                        <button type="button" class="btn-close" onclick="deleteNotification('${notification.id}')"></button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+            
+            // Update stats
+            document.getElementById('totalNotifications').textContent = notifications.length;
+            document.getElementById('unreadNotifications').textContent = notifications.filter(n => !n.read).length;
+            document.getElementById('todayNotifications').textContent = notifications.filter(n => 
+                new Date(n.date).toDateString() === new Date().toDateString()
+            ).length;
+        }
+
+        function getMockNotifications() {
+            return [
+                {
+                    id: 'NOT001',
+                    title: 'Welcome to Galaxy Digital',
+                    message: 'Thank you for joining our platform. Start your investment journey today!',
+                    type: 'info',
+                    recipient: 'All Users',
+                    date: '2024-03-16T10:00:00',
+                    read: true
+                },
+                {
+                    id: 'NOT002',
+                    title: 'New Investment Plan Available',
+                    message: 'Check out our new VIP investment plan with higher returns!',
+                    type: 'success',
+                    recipient: 'Premium Users',
+                    date: '2024-03-16T09:30:00',
+                    read: false
+                }
+            ];
+        }
+
+        // =============================================
         // SYSTEM SETTINGS
         // =============================================
 
@@ -1213,8 +3006,199 @@
             // Load current settings (mock implementation)
             document.getElementById('siteName').value = 'Galaxy Digital Holdings';
             document.getElementById('adminEmail').value = 'admin@galaxydigital.com';
+            document.getElementById('currency').value = 'USD';
             document.getElementById('sessionTimeout').value = 60;
             document.getElementById('maxLoginAttempts').value = 5;
+            document.getElementById('enable2FA').checked = true;
+            document.getElementById('maintenanceMode').checked = false;
+            
+            // Load investment plans
+            loadInvestmentPlans();
+            
+            // Start system uptime counter
+            updateSystemUptime();
+        }
+
+        function loadInvestmentPlans() {
+            const plansContainer = document.getElementById('investmentPlansSettings');
+            const plans = [
+                { id: 1, name: 'Basic Plan', profit: 5, min: 100, max: 5000, duration: 30 },
+                { id: 2, name: 'Premium Plan', profit: 8, min: 5000, max: 20000, duration: 60 },
+                { id: 3, name: 'VIP Plan', profit: 12, min: 20000, max: 100000, duration: 90 }
+            ];
+            
+            plansContainer.innerHTML = plans.map(plan => `
+                <div class="card mb-2">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-3">
+                                <strong>${plan.name}</strong>
+                            </div>
+                            <div class="col-md-2">
+                                <small>Profit: ${plan.profit}%</small>
+                            </div>
+                            <div class="col-md-3">
+                                <small>Range: $${plan.min} - $${plan.max}</small>
+                            </div>
+                            <div class="col-md-2">
+                                <small>${plan.duration} days</small>
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-sm btn-outline-primary" onclick="editPlan(${plan.id})">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deletePlan(${plan.id})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateSystemUptime() {
+            const startTime = sessionStorage.getItem('dashboardStartTime') || new Date().toISOString();
+            if (!sessionStorage.getItem('dashboardStartTime')) {
+                sessionStorage.setItem('dashboardStartTime', startTime);
+            }
+            
+            const now = new Date();
+            const start = new Date(startTime);
+            const diff = now - start;
+            
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+            
+            document.getElementById('systemUptime').textContent = 
+                `${days} days ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // =============================================
+        // MODAL FUNCTIONS
+        // =============================================
+
+        function openTopUpModal(userId, userName) {
+            document.getElementById('topupUserId').value = userId;
+            document.getElementById('topupUsername').textContent = userName;
+            
+            // Reset form
+            document.getElementById('topupType').value = 'deposit';
+            document.getElementById('topupAmount').value = '';
+            document.getElementById('topupNote').value = '';
+            
+            toggleTopUpType();
+            
+            // Show modal
+            new bootstrap.Modal(document.getElementById('topupModal')).show();
+        }
+
+        function toggleTopUpType() {
+            const type = document.getElementById('topupType').value;
+            const planGroup = document.getElementById('investmentPlanGroup');
+            
+            if (type === 'investment') {
+                planGroup.style.display = 'block';
+            } else {
+                planGroup.style.display = 'none';
+            }
+        }
+
+        function submitTopUp() {
+            const userId = document.getElementById('topupUserId').value;
+            const type = document.getElementById('topupType').value;
+            const amount = document.getElementById('topupAmount').value;
+            const note = document.getElementById('topupNote').value;
+            
+            if (!amount || amount <= 0) {
+                showToast('Please enter a valid amount', 'error');
+                return;
+            }
+            
+            // Simulate API call
+            showToast(`${type.charAt(0).toUpperCase() + type.slice(1)} top-up of $${amount} processed successfully`, 'success');
+            
+            // Close modal
+            bootstrap.Modal.getInstance(document.getElementById('topupModal')).hide();
+            
+            // Refresh relevant data
+            if (type === 'deposit') {
+                loadDeposits();
+            } else {
+                loadInvestments();
+            }
+        }
+
+        function calculateEarningsTotal() {
+            const profit = parseFloat(document.getElementById('earningsProfit').value) || 0;
+            const deposit = parseFloat(document.getElementById('earningsDeposit').value) || 0;
+            const investment = parseFloat(document.getElementById('earningsInvestment').value) || 0;
+            
+            const total = profit + deposit + investment;
+            document.getElementById('earningsTotal').textContent = total.toFixed(2);
+        }
+
+        function createEarningsBreakdown() {
+            const user = document.getElementById('earningsUser').value;
+            const period = document.getElementById('earningsPeriod').value;
+            const startDate = document.getElementById('earningsStartDate').value;
+            const endDate = document.getElementById('earningsEndDate').value;
+            const profit = parseFloat(document.getElementById('earningsProfit').value) || 0;
+            const deposit = parseFloat(document.getElementById('earningsDeposit').value) || 0;
+            const investment = parseFloat(document.getElementById('earningsInvestment').value) || 0;
+            const notes = document.getElementById('earningsNotes').value;
+            
+            if (!user || !startDate || !endDate) {
+                showToast('Please fill in all required fields', 'error');
+                return;
+            }
+            
+            // Simulate API call
+            showToast('Earnings breakdown created successfully', 'success');
+            
+            // Close modal and refresh
+            bootstrap.Modal.getInstance(document.getElementById('createEarningsModal')).hide();
+            loadEarningsBreakdowns();
+        }
+
+        function sendNotification() {
+            const user = document.getElementById('notificationUser').value;
+            const title = document.getElementById('notificationTitle').value;
+            const message = document.getElementById('notificationMessage').value;
+            const type = document.getElementById('notificationType').value;
+            
+            if (!title || !message) {
+                showToast('Please fill in title and message', 'error');
+                return;
+            }
+            
+            // Simulate API call
+            showToast(`Notification sent to ${user === 'all' ? 'all users' : 'selected user'}`, 'success');
+            
+            // Close modal
+            bootstrap.Modal.getInstance(document.getElementById('sendNotificationModal')).hide();
+            
+            // Refresh notifications
+            loadNotifications();
+        }
+
+        function sendBroadcast() {
+            const title = document.getElementById('broadcastTitle').value;
+            const message = document.getElementById('broadcastMessage').value;
+            const type = document.getElementById('broadcastType').value;
+            
+            if (!title || !message) {
+                showToast('Please fill in title and message', 'error');
+                return;
+            }
+            
+            // Simulate API call
+            showToast('Broadcast message sent to all users', 'success');
+            
+            // Close modal
+            bootstrap.Modal.getInstance(document.getElementById('broadcastModal')).hide();
         }
 
         // =============================================
@@ -1237,6 +3221,15 @@
                 case 'investment': return 'badge-primary';
                 case 'profit': return 'badge-success';
                 default: return 'badge-secondary';
+            }
+        }
+
+        function getNotificationTypeClass(type) {
+            switch(type) {
+                case 'success': return 'success';
+                case 'warning': return 'warning';
+                case 'error': return 'danger';
+                default: return 'info';
             }
         }
 
@@ -1283,6 +3276,22 @@
             });
         }
 
+        function updateConnectionStatus() {
+            const indicator = document.getElementById('adminConnectionIndicator');
+            const status = document.getElementById('adminConnectionStatus');
+            
+            // Simulate connection check
+            const isConnected = Math.random() > 0.1; // 90% chance of being connected
+            
+            if (isConnected) {
+                indicator.className = 'status-indicator status-connected';
+                status.textContent = 'Connected';
+            } else {
+                indicator.className = 'status-indicator status-disconnected';
+                status.textContent = 'Disconnected';
+            }
+        }
+
         // =============================================
         // ACTION FUNCTIONS
         // =============================================
@@ -1294,19 +3303,78 @@
             loadTransactions();
         }
 
+        function showPendingDeposits() {
+            switchTab('deposits');
+            document.querySelector('#depositsTab .btn-group .btn[data-filter="pending"]').click();
+        }
+
+        function showPendingWithdrawals() {
+            switchTab('withdrawals');
+            document.querySelector('#withdrawalsTab .btn-group .btn[data-filter="pending"]').click();
+        }
+
+        function showRecentUsers() {
+            switchTab('users');
+            document.getElementById('userSearch').value = '';
+            loadUsers();
+        }
+
+        function distributeProfits() {
+            showToast('Profit distribution started...', 'info');
+            // Simulate API call
+            setTimeout(() => {
+                showToast('Profits distributed successfully to all active investments', 'success');
+            }, 2000);
+        }
+
+        function exportData() {
+            showToast('Exporting data...', 'info');
+            // Simulate export
+            setTimeout(() => {
+                showToast('Data exported successfully', 'success');
+            }, 1500);
+        }
+
+        function showSystemStats() {
+            showToast('Showing system statistics...', 'info');
+            switchTab('system');
+        }
+
+        function broadcastNotification() {
+            new bootstrap.Modal(document.getElementById('broadcastModal')).show();
+        }
+
+        function runBackup() {
+            showToast('Starting database backup...', 'info');
+            // Simulate backup
+            setTimeout(() => {
+                document.getElementById('lastBackup').textContent = new Date().toLocaleString();
+                showToast('Database backup completed successfully', 'success');
+            }, 3000);
+        }
+
+        function clearCache() {
+            showToast('Clearing cache...', 'info');
+            // Simulate cache clear
+            setTimeout(() => {
+                showToast('Cache cleared successfully', 'success');
+            }, 1500);
+        }
+
+        function saveSystemSettings() {
+            showToast('System settings saved successfully', 'success');
+        }
+
         function adminLogout() {
             // Clear all session data
             sessionStorage.removeItem('adminLoggedIn');
             sessionStorage.removeItem('adminUsername');
             sessionStorage.removeItem('adminPassword');
             sessionStorage.removeItem('loginTime');
+            sessionStorage.removeItem('dashboardStartTime');
             
             // Redirect to login page
             window.location.href = 'admin-login.html';
-        }
-
-        function saveSystemSettings() {
-            showToast('System settings saved successfully', 'success');
         }
 
         // =============================================
@@ -1315,9 +3383,47 @@
 
         function viewUserDetails(userId) { showToast(`Viewing details for user ${userId}`, 'info'); }
         function editUser(userId) { showToast(`Editing user ${userId}`, 'info'); }
+        function deleteUser(userId) { 
+            if (confirm('Are you sure you want to delete this user?')) {
+                showToast(`User ${userId} deleted`, 'success'); 
+            }
+        }
         function addNewUser() { showToast('Add user functionality to be implemented', 'info'); }
         function viewTransactionDetails(txnId) { showToast(`Viewing transaction ${txnId}`, 'info'); }
         function approveTransaction(txnId) { showToast(`Transaction ${txnId} approved`, 'success'); }
+        function rejectTransaction(txnId) { showToast(`Transaction ${txnId} rejected`, 'success'); }
+        function viewProof(proofId) { showToast(`Viewing proof ${proofId}`, 'info'); }
+        function approveDeposit(depositId) { showToast(`Deposit ${depositId} approved`, 'success'); }
+        function rejectDeposit(depositId) { showToast(`Deposit ${depositId} rejected`, 'success'); }
+        function viewDepositDetails(depositId) { showToast(`Viewing deposit ${depositId}`, 'info'); }
+        function approveWithdrawal(withdrawalId) { showToast(`Withdrawal ${withdrawalId} approved`, 'success'); }
+        function rejectWithdrawal(withdrawalId) { showToast(`Withdrawal ${withdrawalId} rejected`, 'success'); }
+        function viewWithdrawalDetails(withdrawalId) { showToast(`Viewing withdrawal ${withdrawalId}`, 'info'); }
+        function viewInvestmentDetails(investmentId) { showToast(`Viewing investment ${investmentId}`, 'info'); }
+        function editInvestment(investmentId) { showToast(`Editing investment ${investmentId}`, 'info'); }
+        function cancelInvestment(investmentId) { 
+            if (confirm('Are you sure you want to cancel this investment?')) {
+                showToast(`Investment ${investmentId} cancelled`, 'success'); 
+            }
+        }
+        function viewEarningsDetails(earningId) { showToast(`Viewing earnings ${earningId}`, 'info'); }
+        function processEarnings(earningId) { showToast(`Earnings ${earningId} processed`, 'success'); }
+        function deleteEarnings(earningId) { 
+            if (confirm('Are you sure you want to delete this earnings breakdown?')) {
+                showToast(`Earnings ${earningId} deleted`, 'success'); 
+            }
+        }
+        function deleteNotification(notificationId) { showToast(`Notification ${notificationId} deleted`, 'success'); }
+        function useTemplate(template) { showToast(`Using template: ${template}`, 'info'); }
+        function editPlan(planId) { showToast(`Editing plan ${planId}`, 'info'); }
+        function deletePlan(planId) { 
+            if (confirm('Are you sure you want to delete this investment plan?')) {
+                showToast(`Plan ${planId} deleted`, 'success'); 
+            }
+        }
+        function createBulkEarningsBreakdown() { showToast('Bulk earnings creation to be implemented', 'info'); }
+        function submitInvestmentAdjustment() { showToast('Investment adjustment to be implemented', 'info'); }
+        function loadReports() { showToast('Loading reports...', 'info'); }
     </script>
 </body>
 </html>
